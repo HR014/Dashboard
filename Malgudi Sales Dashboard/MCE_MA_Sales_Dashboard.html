@@ -1007,7 +1007,7 @@ function parseDate(str) {
 // ============================================================
 // LOAD DATA FROM GOOGLE SHEETS (API)
 // ============================================================
-
+async function loadData(fy = CURRENT_FY) {
   const tabs = SHEET_TAB_MAP[fy];
   if (!tabs) {
     console.error(`No sheet tab mapping found for fiscal year ${fy}`);
@@ -1094,7 +1094,7 @@ function fmtFull(n) {
 // ============================================================
 // FILTER LOGIC
 // ============================================================
-
+function getFiltered() {
   const from = document.getElementById('filter-from').value;
   const to = document.getElementById('filter-to').value;
   const product = document.getElementById('filter-product').value;
@@ -1237,7 +1237,7 @@ function initFilters() {
 // ============================================================
 // UPDATE ALL
 // ============================================================
-
+function updateAll() {
   const data = getFiltered();
   updateKPIs(data);
   updateMonthly(data);
