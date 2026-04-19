@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCE Sales Dashboard — FY 2025–26</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0d14;
+    --surface: #111520;
+    --surface2: #181e2e;
+    --border: rgba(255,255,255,0.07);
+    --accent: #3b82f6;
+    --accent2: #06d6a0;
+    --accent3: #f59e0b;
+    --accent4: #ef4444;
+    --accent5: #a855f7;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --card-glow: rgba(59,130,246,0.08);
+  }
+
+  /* LIGHT MODE */
+  [data-theme="light"] {
+    --bg: #f0f4f8;
+    --surface: #ffffff;
+    --surface2: #e8edf3;
+    --border: rgba(0,0,0,0.09);
+    --accent: #2563eb;
+    --accent2: #059669;
+    --accent3: #d97706;
+    --accent4: #dc2626;
+    --accent5: #7c3aed;
+    --text: #1e293b;
+    --muted: #64748b;
+    --card-glow: rgba(37,99,235,0.06);
+  }
+  [data-theme="light"] header {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8e 100%);
+  }
+  [data-theme="light"] .logo { color: #fff; }
+  [data-theme="light"] .header-meta { color: rgba(255,255,255,0.75); }
+  [data-theme="light"] select,
+  [data-theme="light"] input[type="date"] {
+    background: #fff;
+    color: #1e293b;
+    border-color: rgba(0,0,0,0.15);
+  }
+  [data-theme="light"] select option { background: #fff; color: #1e293b; }
+  [data-theme="light"] .kpi-card,
+  [data-theme="light"] .chart-card {
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  [data-theme="light"] .txn-table th {
+    background: #ffffff;
+  }
+  [data-theme="light"] tr:hover td { background: rgba(0,0,0,0.025); }
+
+  /* THEME TOGGLE BUTTON */
+  .theme-toggle {
+    width: 44px; height: 24px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.25);
+    cursor: pointer;
+    position: relative;
+    transition: background 0.3s;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 2px;
+  }
+  .theme-toggle:hover { background: rgba(255,255,255,0.25); }
+  .theme-toggle-thumb {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+  [data-theme="light"] .theme-toggle {
+    background: rgba(0,0,0,0.12);
+    border-color: rgba(0,0,0,0.15);
+  }
+  [data-theme="light"] .theme-toggle-thumb {
+    transform: translateX(20px);
+    background: #1e3a5f;
+  }
+  .theme-label {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.7);
+    white-space: nowrap;
+  }
+  [data-theme="light"] .theme-label { color: rgba(255,255,255,0.8); }
+  .theme-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.15rem;
+    letter-spacing: -0.5px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent5));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .header-meta {
+    font-size: 0.78rem;
+    color: var(--muted);
+    display: flex; gap: 20px; align-items: center;
+  }
+  .live-dot {
+    width: 7px; height: 7px;
+    background: var(--accent2);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    display: inline-block; margin-right: 5px;
+  }
+  @keyframes pulse {
+    0%,100%{ opacity:1; } 50%{ opacity:0.3; }
+  }
+
+  /* MAIN LAYOUT */
+  main { padding: 28px 32px; max-width: 1600px; margin: 0 auto; }
+
+  /* FILTERS */
+  .filters-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 20px;
+  }
+  .filter-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-right: 4px;
+  }
+  .filter-group { display: flex; align-items: center; gap: 8px; }
+  select, input[type="date"], input[type="text"] {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 7px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input[type="text"] {
+    cursor: text;
+    min-width: 220px;
+    max-width: 320px;
+  }
+  select:hover, input[type="date"]:hover, input[type="text"]:hover { border-color: var(--accent); }
+  select option { background: var(--surface2); }
+  .btn-reset {
+    background: rgba(59,130,246,0.12);
+    border: 1px solid rgba(59,130,246,0.25);
+    color: var(--accent);
+    border-radius: 8px;
+    padding: 7px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: auto;
+  }
+  .btn-reset:hover { background: var(--accent); color: #fff; }
+  .filter-count {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 20px;
+    padding: 2px 8px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  /* KPI CARDS */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+    border-radius: 16px 16px 0 0;
+  }
+  .kpi-card:nth-child(1)::before { background: linear-gradient(90deg, var(--accent), var(--accent5)); }
+  .kpi-card:nth-child(2)::before { background: linear-gradient(90deg, var(--accent2), #0ea5e9); }
+  .kpi-card:nth-child(3)::before { background: linear-gradient(90deg, var(--accent3), #f97316); }
+  .kpi-card:nth-child(4)::before { background: linear-gradient(90deg, var(--accent5), var(--accent4)); }
+  .kpi-card:nth-child(5)::before { background: linear-gradient(90deg, #14b8a6, #0ea5e9); }
+  .kpi-card:nth-child(6)::before { background: linear-gradient(90deg, #f97316, #ef4444); }
+  .kpi-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    margin-bottom: 14px;
+  }
+  .kpi-card:nth-child(1) .kpi-icon { background: rgba(59,130,246,0.12); }
+  .kpi-card:nth-child(2) .kpi-icon { background: rgba(6,214,160,0.12); }
+  .kpi-card:nth-child(3) .kpi-icon { background: rgba(245,158,11,0.12); }
+  .kpi-card:nth-child(4) .kpi-icon { background: rgba(168,85,247,0.12); }
+  .kpi-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .kpi-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .kpi-sub { font-size: 0.78rem; color: var(--muted); }
+
+  /* CHART GRID */
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+    margin-top: 28px;
+  }
+  .charts-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .charts-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .charts-full { margin-bottom: 16px; }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 24px;
+    transition: box-shadow 0.2s;
+  }
+  .chart-card:hover { box-shadow: 0 4px 24px rgba(0,0,0,0.25); }
+  .chart-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--text);
+    margin-bottom: 4px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .chart-title-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+  .chart-subtitle { font-size: 0.75rem; color: var(--muted); margin-bottom: 16px; }
+  .chart-container { position: relative; }
+  canvas { max-width: 100%; }
+
+  /* TOP/BOTTOM TABLE */
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+  th {
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    color: var(--text);
+  }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .rank-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+  }
+  .rank-top { background: rgba(6,214,160,0.15); color: var(--accent2); }
+  .rank-bot { background: rgba(239,68,68,0.15); color: var(--accent4); }
+  .bar-mini {
+    display: inline-block;
+    height: 6px;
+    border-radius: 3px;
+    min-width: 4px;
+    vertical-align: middle;
+    margin-left: 8px;
+  }
+  .top5-bar { background: linear-gradient(90deg, var(--accent2), #0ea5e9); }
+  .bot5-bar { background: linear-gradient(90deg, var(--accent4), #f97316); }
+
+  /* TRANSACTION TABLE */
+  .txn-table th { position: sticky; top: 0; background: var(--surface); }
+  .product-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    background: rgba(59,130,246,0.12);
+    color: var(--accent);
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+  /* RESPONSIVE DESIGN - MOBILE FIRST */
+  @media (max-width: 480px) {
+    /* Header */
+    header {
+      padding: 12px 16px;
+      height: auto;
+      flex-direction: column;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .logo {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      font-size: 14px;
+    }
+    .header-meta {
+      font-size: 0.7rem;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .entity-switcher {
+      margin-right: 0;
+      width: 100%;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+    .entity-btn {
+      padding: 8px 12px;
+      font-size: 0.7rem;
+      flex: 1;
+      text-align: center;
+    }
+    .theme-group {
+      margin-left: 0;
+      margin-top: 8px;
+    }
+
+    /* Main Layout */
+    main { padding: 12px 16px; }
+
+    /* Filters */
+    .filters-bar {
+      padding: 12px 16px;
+      gap: 8px;
+    }
+    .filter-group {
+      flex-direction: column;
+      align-items: flex-start;
+      width: 100%;
+      gap: 4px;
+    }
+    .filter-label {
+      font-size: 0.65rem;
+      margin-bottom: 2px;
+    }
+    select, input[type="date"], input[type="text"] {
+      width: 100%;
+      padding: 8px 10px;
+      font-size: 0.8rem;
+    }
+    .btn-reset {
+      width: 100%;
+      margin-top: 12px;
+      padding: 10px 16px;
+    }
+
+    /* KPI Cards */
+    .kpi-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .kpi-card {
+      padding: 16px 18px;
+    }
+    .kpi-icon {
+      width: 32px;
+      height: 32px;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    .kpi-label {
+      font-size: 0.75rem;
+      margin-bottom: 6px;
+    }
+    .kpi-value {
+      font-size: 1.4rem;
+      margin-bottom: 4px;
+    }
+    .kpi-sub {
+      font-size: 0.65rem;
+    }
+
+    /* Charts */
+    .charts-2col, .charts-3col {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .chart-card {
+      padding: 16px;
+    }
+    .chart-title {
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+    }
+    .chart-subtitle {
+      font-size: 0.75rem;
+      margin-bottom: 16px;
+    }
+    .chart-container {
+      height: 200px !important;
+    }
+
+    /* Tables */
+    .txn-table th, .txn-table td {
+      padding: 8px 6px;
+      font-size: 0.75rem;
+    }
+    .txn-table th {
+      font-size: 0.7rem;
+    }
+    .table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Section Titles */
+    .section-title {
+      font-size: 1rem;
+      margin: 24px 0 16px 0;
+    }
+
+    /* Transaction Table Container */
+    .chart-card .table-wrap {
+      max-height: 300px;
+    }
+  }
+
+  @media (min-width: 481px) and (max-width: 768px) {
+    /* Tablet styles */
+    header {
+      padding: 16px 20px;
+    }
+    main { padding: 16px 20px; }
+
+    .kpi-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    .charts-2col {
+      grid-template-columns: 1fr;
+    }
+    .charts-3col {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .entity-switcher {
+      margin-right: 12px;
+    }
+    .entity-btn {
+      padding: 6px 12px;
+      font-size: 0.75rem;
+    }
+
+    .filters-bar {
+      padding: 14px 18px;
+    }
+    .filter-group {
+      min-width: 0;
+      flex: 1;
+    }
+    select, input[type="date"], input[type="text"] {
+      font-size: 0.8rem;
+    }
+
+    .chart-container {
+      height: 240px !important;
+    }
+  }
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    /* Small desktop styles */
+    .kpi-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .charts-2col {
+      grid-template-columns: 1fr;
+    }
+    .charts-3col {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .chart-container {
+      height: 260px !important;
+    }
+  }
+
+  @media (min-width: 1025px) and (max-width: 1440px) {
+    /* Large desktop styles */
+    .kpi-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .charts-2col {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .charts-3col {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 1441px) {
+    /* Ultra-wide screens */
+    main {
+      max-width: 1800px;
+      margin: 0 auto;
+    }
+    .kpi-grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+    .charts-2col {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .charts-3col {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* Touch-friendly improvements */
+  @media (hover: none) and (pointer: coarse) {
+    /* Mobile/touch devices */
+    .entity-btn, .btn-reset, .theme-toggle {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    select, input[type="date"], input[type="text"] {
+      min-height: 44px;
+    }
+    .kpi-card:hover {
+      transform: none;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .chart-card:hover {
+      transform: none;
+    }
+  }
+
+  /* High DPI displays */
+  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .chart-container canvas {
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
+  }
+
+  /* MOBILE OPTIMIZATIONS */
+  .mobile-optimized {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Better touch targets for mobile */
+  button, select, input, .entity-btn, .btn-reset {
+    touch-action: manipulation;
+  }
+
+  /* Prevent zoom on input focus for iOS */
+  input[type="text"], input[type="date"], select {
+    font-size: 16px;
+  }
+
+  /* Smooth scrolling for mobile */
+  html {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ANIMATIONS */
+  .kpi-card, .chart-card {
+    animation: fadeUp 0.4s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .kpi-card:nth-child(1){animation-delay:0.05s}
+  .kpi-card:nth-child(2){animation-delay:0.1s}
+  .kpi-card:nth-child(3){animation-delay:0.15s}
+  .kpi-card:nth-child(4){animation-delay:0.2s}
+
+
+  .entity-switcher {
+    display: flex;
+    gap: 4px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    padding: 4px;
+    margin-right: 16px;
+  }
+  .entity-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .entity-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  .entity-btn:hover:not(.active) {
+    background: rgba(255,255,255,0.08);
+    color: var(--text);
+  }
+  .no-data {
+    text-align: center;
+    color: var(--muted);
+    padding: 40px;
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🏗️</div>
+    MCE Analytics
+  </div>
+  <div style="display:flex;align-items:center">
+    <div class="entity-switcher">
+      <button class="entity-btn active" id="btn-mce" onclick="switchEntity('mce')">🏗️ MCE</button>
+      <button class="entity-btn" id="btn-ma" onclick="switchEntity('ma')">🔧 Malgudi Associates</button>
+      <button class="entity-btn" id="btn-combined" onclick="switchEntity('combined')">🏢 Malgudi Cranes & Equipments</button>
+    </div>
+    <div class="header-meta">
+    <span><span class="live-dot"></span>Live Dashboard</span>
+    <span id="header-fy-label">FY 2025–26 | Sales Register</span>
+    <span id="record-count-header" class="filter-count">134 records</span>
+    </div>
+    <div class="theme-group" style="margin-left:16px">
+      <span class="theme-label" id="theme-label">🌙 Dark</span>
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <span class="theme-toggle-thumb">🌙</span>
+      </button>
+    </div>
+</div>
+</header>
+
+<main>
+  <!-- FILTERS -->
+  <div class="filters-bar">
+    <div class="filter-group">
+      <span class="filter-label">📅 Date</span>
+      <input type="date" id="filter-from" value="">
+      <span class="filter-label">→</span>
+      <input type="date" id="filter-to" value="2026-03-30">
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">📆 Year</span>
+      <select id="filter-fy" onchange="switchFY(this.value)">
+        <option value="2025-2026">FY 2025–26</option>
+        <option value="2026-2027">FY 2026–27</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">🔍 PO Search</span>
+      <input type="text" id="filter-po" placeholder="Search by PO No...">
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">📦 Product</span>
+      <select id="filter-product">
+        <option value="">All Products</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">🏢 Customer</span>
+      <select id="filter-customer">
+        <option value="">All Customers</option>
+      </select>
+    </div>
+    <button class="btn-reset" onclick="resetFilters()">↺ Reset</button>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-label">Basic Value (Excl. GST)</div>
+      <div class="kpi-value" id="kpi-revenue">—</div>
+      <div class="kpi-sub" id="kpi-revenue-exact" style="font-size:0.7rem;color:var(--muted);margin-top:4px;word-break:break-all">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">📊</div>
+      <div class="kpi-label">Gross Total (With GST)</div>
+      <div class="kpi-value" id="kpi-gross">—</div>
+      <div class="kpi-sub" id="kpi-gross-exact" style="font-size:0.7rem;color:var(--muted);margin-top:4px;word-break:break-all">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🧾</div>
+      <div class="kpi-label">Total Invoices</div>
+      <div class="kpi-value" id="kpi-orders">—</div>
+      <div class="kpi-sub">Sales transactions</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">📈</div>
+      <div class="kpi-label">Avg Invoice Value (Basic)</div>
+      <div class="kpi-value" id="kpi-avg">—</div>
+      <div class="kpi-sub" id="kpi-avg-exact" style="font-size:0.7rem;color:var(--muted);margin-top:4px">—</div>
+    </div>
+    <div class="kpi-card" id="kpi-combined-card">
+      <div class="kpi-icon">🤝</div>
+      <div class="kpi-label">Combined Sales Value</div>
+      <div class="kpi-value" id="kpi-combined">—</div>
+      <div class="kpi-sub" id="kpi-combined-exact" style="font-size:0.7rem;color:var(--muted);margin-top:4px">MCE + MA this FY</div>
+    </div>
+    <div class="kpi-card" id="kpi-target-card">
+      <div class="kpi-icon">🎯</div>
+      <div class="kpi-label">FY Target</div>
+      <div class="kpi-value" id="kpi-target">—</div>
+      <div class="kpi-sub" id="kpi-target-exact" style="font-size:0.7rem;color:var(--muted);margin-top:4px">Set target in Excel</div>
+    </div>
+    <div class="kpi-card" id="kpi-gap-card">
+      <div class="kpi-icon">⚠️</div>
+      <div class="kpi-label">Shortfall</div>
+      <div class="kpi-value" id="kpi-gap">—</div>
+      <div class="kpi-sub" id="kpi-gap-exact" style="font-size:0.7rem;color:var(--muted);margin-top:4px">Gap vs target</div>
+    </div>
+  </div>
+
+  <div id="combined-dashboard-section">
+  <!-- STRATEGY & COMPARISON -->
+  <div class="section-title">📊 MCE vs MA Comparison</div>
+  <div class="charts-3col">
+    <div class="chart-card" style="animation-delay:0.25s">
+      <div class="chart-title"><span class="chart-title-dot" style="background:var(--accent)"></span>MCE vs MA Revenue</div>
+      <div class="chart-subtitle">Compare active fiscal year sales</div>
+      <div class="chart-container" style="height:220px">
+        <canvas id="chart-entity-compare"></canvas>
+      </div>
+    </div>
+    <div class="chart-card" style="animation-delay:0.3s">
+      <div class="chart-title"><span class="chart-title-dot" style="background:var(--accent5)"></span>Growth Analytics</div>
+      <div class="chart-subtitle">Month-over-month revenue growth</div>
+      <div class="chart-container" style="height:220px">
+        <canvas id="chart-growth"></canvas>
+      </div>
+    </div>
+    <div class="chart-card" style="animation-delay:0.35s">
+      <div class="chart-title"><span class="chart-title-dot" style="background:var(--accent2)"></span>Business Insights</div>
+      <div class="chart-subtitle">Targets, shortfall and top focus areas</div>
+      <div id="insights-body" style="min-height:220px; display:flex; flex-direction:column; gap:10px; font-size:0.9rem; color:var(--text);"></div>
+    </div>
+  </div>
+  </div>
+
+  <!-- ROW 1: Monthly trend + Product mix -->
+  <div class="section-title">📈 Sales Performance</div>
+  <div class="charts-2col">
+    <div class="chart-card" style="animation-delay:0.25s">
+      <div class="chart-title"><span class="chart-title-dot" style="background:var(--accent)"></span>Monthly Revenue Trend</div>
+      <div class="chart-subtitle">Month-over-month revenue (₹ taxable)</div>
+      <div class="chart-container" style="height:260px">
+        <canvas id="chart-monthly"></canvas>
+      </div>
+    </div>
+    <div class="chart-card" style="animation-delay:0.3s">
+      <div class="chart-title"><span class="chart-title-dot" style="background:var(--accent5)"></span>Product Category Mix</div>
+      <div class="chart-subtitle">Revenue share by product type</div>
+      <div class="chart-container" style="height:260px">
+        <canvas id="chart-product-pie"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2: Product bar + Customer bar -->
+  <div class="charts-2col">
+    <div class="chart-card" style="animation-delay:0.35s">
+      <div class="chart-title"><span class="chart-title-dot" style="background:var(--accent2)"></span>Revenue by Product Category</div>
+      <div class="chart-subtitle">Total taxable revenue per product type</div>
+      <div class="chart-container" style="height:280px">
+        <canvas id="chart-product-bar"></canvas>
+      </div>
+    </div>
+    <div class="chart-card" style="animation-delay:0.4s">
+      <div class="chart-title"><span class="chart-title-dot" style="background:var(--accent3)"></span>Top 10 Customers by Revenue</div>
+      <div class="chart-subtitle">Largest buyers this period</div>
+      <div class="chart-container" style="height:280px">
+        <canvas id="chart-customers"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3: GST breakdown + Invoice count -->
+  <div class="section-title">🔍 Advanced Insights</div>
+  <div class="charts-3col">
+    <div class="chart-card" style="animation-delay:0.45s">
+      <div class="chart-title"><span class="chart-title-dot" style="background:var(--accent4)"></span>GST Type Distribution</div>
+      <div class="chart-subtitle">CGST / SGST vs IGST split</div>
+      <div class="chart-container" style="height:220px">
+        <canvas id="chart-gst-pie"></canvas>
+      </div>
+    </div>
+    <div class="chart-card" style="animation-delay:0.5s">
+      <div class="chart-title"><span class="chart-title-dot" style="background:var(--accent2)"></span>Invoice Count by Month</div>
+      <div class="chart-subtitle">Volume of transactions per month</div>
+      <div class="chart-container" style="height:220px">
+        <canvas id="chart-count"></canvas>
+      </div>
+    </div>
+    <div class="chart-card" style="animation-delay:0.55s">
+      <div class="chart-title"><span class="chart-title-dot" style="background:var(--accent3)"></span>Gross Total vs Taxable</div>
+      <div class="chart-subtitle">GST impact on billing per month</div>
+      <div class="chart-container" style="height:220px">
+        <canvas id="chart-gst-stack"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP 5 / BOTTOM 5 -->
+  <div class="section-title">🏆 Customer Rankings</div>
+  <div class="charts-2col">
+    <div class="chart-card">
+      <div class="chart-title"><span class="chart-title-dot" style="background:var(--accent2)"></span>Top 5 Customers</div>
+      <div class="chart-subtitle">Highest revenue contributors</div>
+      <div class="table-wrap">
+        <table id="top5-table"></table>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title"><span class="chart-title-dot" style="background:var(--accent4)"></span>Bottom 5 Customers</div>
+      <div class="chart-subtitle">Lowest revenue contributors</div>
+      <div class="table-wrap">
+        <table id="bot5-table"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRANSACTION TABLE -->
+  <div class="section-title">📋 Transactions</div>
+  <div class="chart-card" style="padding:0; overflow:hidden">
+    <div style="padding:18px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between">
+      <div>
+        <div class="chart-title">All Invoices</div>
+        <div class="chart-subtitle" style="margin:0">Filtered transaction list</div>
+      </div>
+      <span id="txn-count" class="filter-count">—</span>
+    </div>
+    <div style="max-height:360px; overflow-y:auto">
+      <table class="txn-table" id="txn-table" style="padding: 0">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Invoice No</th>
+            <th>PO No</th>
+            <th>Customer</th>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Revenue (₹)</th>
+            <th>Gross Total (₹)</th>
+            <th>GST (₹)</th>
+          </tr>
+        </thead>
+        <tbody id="txn-body"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script>
+  let ALL_DATA = [];
+  let ACTIVE_DATA = [];
+  let CURRENT_ENTITY = 'mce';
+  let CURRENT_FY = '2025-2026';
+  let TARGETS_DATA = {};
+
+  const SHEET_FILE_ID = '1K3OJfyovT8gOgN785XHsRWaxJSVpZxN4P-28V-0zsIA';
+  const SHEET_TAB_MAP = {
+    '2025-2026': { mce: 'MCE-25-26', ma: 'MA-25-26' },
+    '2026-2027': { mce: 'MCE-26-27', ma: 'MA-26-27' }
+  };
+
+  const DEFAULT_TARGETS = {
+    '2025-2026': { mce: 0, ma: 0, combined: 0 },
+    '2026-2027': { mce: 0, ma: 0, combined: 0 }
+  };
+
+  // Define yearly target values in Excel using a sheet/tab named "Targets"
+  // with columns: FY, Entity, Target
+  // Example: 2025-2026, mce, 62000000
+  //          2025-2026, ma, 12000000
+  //          2025-2026, combined, 74000000
+// ============================================================
+// EMBEDDED DATA
+// ============================================================
+function parseDate(str) {
+  const months = {
+    Jan:0, Feb:1, Mar:2, Apr:3, May:4, Jun:5,
+    Jul:6, Aug:7, Sep:8, Oct:9, Nov:10, Dec:11
+  };
+
+  if (!str) return null;
+
+  const parts = str.split("-");
+  if (parts.length !== 3) return new Date(str);
+
+  let day = parseInt(parts[0]);
+  let month = months[parts[1]];
+  let year = parseInt(parts[2]);
+
+  if (year < 100) year += 2000;
+
+  return new Date(year, month, day);
+}
+
+// ============================================================
+// LOAD DATA FROM GOOGLE SHEETS (API)
+// ============================================================
+
+  const tabs = SHEET_TAB_MAP[fy];
+  if (!tabs) {
+    console.error(`No sheet tab mapping found for fiscal year ${fy}`);
+    return;
+  }
+
+  try {
+    const [mceRes, maRes, targetRes] = await Promise.all([
+      fetch(`https://opensheet.elk.sh/${SHEET_FILE_ID}/${encodeURIComponent(tabs.mce)}`),
+      fetch(`https://opensheet.elk.sh/${SHEET_FILE_ID}/${encodeURIComponent(tabs.ma)}`),
+      fetch(`https://opensheet.elk.sh/${SHEET_FILE_ID}/Targets`).catch(() => null)
+    ]);
+
+    const mceData = await mceRes.json();
+    const maData = await maRes.json();
+    const targetData = targetRes ? await targetRes.json() : null;
+
+    if (targetData) loadTargets(targetData);
+
+    const format = (data, entity) =>
+      data.map(row => {
+        const d = parseDate(row.Date);
+        if (!d || isNaN(d)) return null;
+
+        const year = d.getFullYear();
+        const m = d.getMonth();
+
+        const fy = m >= 3
+          ? `${year}-${year + 1}`
+          : `${year - 1}-${year}`;
+
+        return {
+          Date: d.toISOString().slice(0,10),
+          Customer: row.Customer,
+          Product: row.Product,
+          QTY: Number(row.QTY) || 0,
+          VoucherNo: row["Voucher Type"] || '-',
+          InvoiceNo: row["Invoice No"],
+          PO: row["Purchase Order No"] || "-",
+          "GSTIN/UIN": row["GSTIN/UIN"],
+
+          Revenue: Number((row.Revenue || '').replace(' Dr', '').replace(' Cr', '')) || 0,
+          GrossTotal: Number((row.GrossTotal || '').replace(' Dr', '').replace(' Cr', '')) || 0,
+          TotalGST: Number((row["OUTPUT CGST 9%"] || '').replace(' Dr', '').replace(' Cr', '')) + Number((row["OUTPUT SGST 9%"] || '').replace(' Dr', '').replace(' Cr', '')),
+
+          FY: fy,
+          Month: d.toISOString().slice(0,7),
+          MonthName: d.toLocaleString('en-IN',{month:'short',year:'numeric'}),
+
+          Entity: entity
+        };
+      }).filter(Boolean);
+
+    ALL_DATA = [
+      ...format(mceData, 'mce'),
+      ...format(maData, 'ma')
+    ].filter(d => d !== null); // Filter out null entries
+
+    console.log("API Loaded:", ALL_DATA.length);
+
+    renderEntityMode();
+    applyFilters();
+
+  } catch (err) {
+    console.error("API ERROR:", err);
+  }
+}
+// ============================================================
+// CHART INSTANCES
+// ============================================================
+const charts = {};
+const COLORS = ['#3b82f6','#06d6a0','#f59e0b','#ef4444','#a855f7','#0ea5e9','#f97316','#10b981','#ec4899','#8b5cf6','#14b8a6'];
+
+function fmt(n) {
+  if (n >= 1e7) return '₹' + (n/1e7).toFixed(2) + ' Cr';
+  if (n >= 1e5) return '₹' + (n/1e5).toFixed(1) + ' L';
+  return '₹' + n.toLocaleString('en-IN', {maximumFractionDigits:0});
+}
+
+function fmtFull(n) {
+  return '₹' + Math.round(n).toLocaleString('en-IN');
+}
+
+// ============================================================
+// FILTER LOGIC
+// ============================================================
+
+  const from = document.getElementById('filter-from').value;
+  const to = document.getElementById('filter-to').value;
+  const product = document.getElementById('filter-product').value;
+  const customer = document.getElementById('filter-customer').value;
+  const poSearch = document.getElementById('filter-po').value.toLowerCase().trim();
+
+  return ACTIVE_DATA.filter(d => {
+    if (d.FY !== CURRENT_FY) return false;
+    if (from && d.Date.substring(0,10) < from) return false;
+    if (to && d.Date.substring(0,10) > to) return false;
+    if (product && d.Product !== product) return false;
+    if (customer && d.Customer !== customer) return false;
+    if (poSearch && !d.PO.toLowerCase().includes(poSearch)) return false;
+    return true;
+  });
+}
+
+function getCombinedData() {
+  const from = document.getElementById('filter-from').value;
+  const to = document.getElementById('filter-to').value;
+  const product = document.getElementById('filter-product').value;
+  const customer = document.getElementById('filter-customer').value;
+  const poSearch = document.getElementById('filter-po').value.toLowerCase().trim();
+
+  return ALL_DATA.filter(d => {
+    if (d.FY !== CURRENT_FY) return false;
+    if (from && d.Date.substring(0,10) < from) return false;
+    if (to && d.Date.substring(0,10) > to) return false;
+    if (product && d.Product !== product) return false;
+    if (customer && d.Customer !== customer) return false;
+    if (poSearch && !d.PO.toLowerCase().includes(poSearch)) return false;
+    return true;
+  });
+}
+
+function parseTargetValue(value) {
+  if (!value && value !== 0) return 0;
+  return Number(String(value).replace(/[^0-9.\-]/g, '')) || 0;
+}
+
+function loadTargets(rows) {
+  TARGETS_DATA = {};
+  rows.forEach(row => {
+    const fy = (row.FY || '').trim();
+    const entity = (row.Entity || row.Entity || '').toLowerCase().trim();
+    const target = parseTargetValue(row.Target || row['FY Target'] || row.Amount);
+    if (!fy || !entity) return;
+    TARGETS_DATA[fy] = TARGETS_DATA[fy] || {};
+    TARGETS_DATA[fy][entity] = target;
+  });
+}
+
+function getTarget(fy, entity) {
+  return (TARGETS_DATA[fy] && TARGETS_DATA[fy][entity])
+    || (DEFAULT_TARGETS[fy] && DEFAULT_TARGETS[fy][entity])
+    || 0;
+}
+
+function getDateRange(data) {
+  const dates = data.map(d => d.Date).filter(Boolean).sort();
+  return { from: dates[0] || '2025-04-01', to: dates[dates.length-1] || '2026-03-31' };
+}
+
+function getFiscalYearRange(fy) {
+  const [start, end] = fy.split('-').map(Number);
+  return {
+    from: `${start}-04-01`,
+    to: `${end}-03-31`
+  };
+}
+
+function getFYLabel(fy) {
+  return fy === '2025-2026'
+    ? 'FY 2025–26'
+    : fy === '2026-2027'
+      ? 'FY 2026–27'
+      : fy;
+}
+
+function resetFilters() {
+  const range = getFiscalYearRange(CURRENT_FY);
+  document.getElementById('filter-from').value = range.from;
+  document.getElementById('filter-to').value = range.to;
+  document.getElementById('filter-product').value = '';
+  document.getElementById('filter-customer').value = '';
+  document.getElementById('filter-fy').value = CURRENT_FY;
+  updateAll();
+}
+
+function applyFilters() {
+  if (CURRENT_ENTITY === 'combined') {
+    ACTIVE_DATA = ALL_DATA.filter(d => d.FY === CURRENT_FY);
+  } else {
+    ACTIVE_DATA = ALL_DATA.filter(d => d.Entity === CURRENT_ENTITY);
+    const fyFiltered = ACTIVE_DATA.filter(d => d.FY === CURRENT_FY);
+    if (fyFiltered.length > 0) {
+      ACTIVE_DATA = fyFiltered;
+    }
+  }
+
+  document.getElementById('filter-fy').value = CURRENT_FY;
+  document.getElementById('header-fy-label').textContent = `${getFYLabel(CURRENT_FY)} | ${getEntityTitle(CURRENT_ENTITY)}`;
+  document.title = `${getFYLabel(CURRENT_FY)} — ${getEntityTitle(CURRENT_ENTITY)}`;
+  rebuildFilters();
+  resetFilters();
+}
+
+function switchFY(fy) {
+  CURRENT_FY = fy;
+  loadData(fy);
+}
+
+// ============================================================
+// POPULATE FILTER DROPDOWNS
+// ============================================================
+function initFilters() {
+  // 🔥 Use ALL_DATA instead of RAW_DATA
+  const products = [...new Set(ALL_DATA.map(d => d.Product))].sort();
+  const pSel = document.getElementById('filter-product');
+  pSel.innerHTML = '<option value="">All Products</option>';
+
+  products.forEach(p => {
+    const o = document.createElement('option');
+    o.value = p;
+    o.textContent = p;
+    pSel.appendChild(o);
+  });
+
+  const customers = [...new Set(ALL_DATA.map(d => d.Customer))].sort();
+  const cSel = document.getElementById('filter-customer');
+  cSel.innerHTML = '<option value="">All Customers</option>';
+
+  customers.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c;
+    o.textContent = c;
+    cSel.appendChild(o);
+  });
+}
+// ============================================================
+// UPDATE ALL
+// ============================================================
+
+  const data = getFiltered();
+  updateKPIs(data);
+  updateMonthly(data);
+  updateProductPie(data);
+  updateProductBar(data);
+  updateCustomers(data);
+  updateEntityCompareChart();
+  updateGrowthChart(data);
+  updateGSTPie(data);
+  updateCountChart(data);
+  updateGSTStack(data);
+  updateTop5Bot5(data);
+  updateBusinessInsights(data);
+  updateTxnTable(data);
+  document.getElementById('record-count-header').textContent = data.length + ' records';
+  document.getElementById('txn-count').textContent = data.length;
+}
+
+// ============================================================
+// KPIs
+// ============================================================
+function updateKPIs(data) {
+  const totalRev = data.reduce((a,d) => a + d.Revenue, 0);
+  const totalGross = data.reduce((a,d) => a + d.GrossTotal, 0);
+  const count = data.length;
+
+  // Group by invoice to calculate average invoice value correctly
+  const invoiceMap = {};
+  data.forEach(d => {
+    if (d.InvoiceNo && d.InvoiceNo.trim()) {
+      if (!invoiceMap[d.InvoiceNo]) {
+        invoiceMap[d.InvoiceNo] = { revenue: 0, gross: 0 };
+      }
+      invoiceMap[d.InvoiceNo].revenue += d.Revenue;
+      invoiceMap[d.InvoiceNo].gross += d.GrossTotal;
+    }
+  });
+
+  const uniqueInvoices = Object.keys(invoiceMap);
+  const avgInvoiceValue = uniqueInvoices.length ? 
+    uniqueInvoices.reduce((sum, inv) => sum + invoiceMap[inv].gross, 0) / uniqueInvoices.length : 0;
+
+  const combinedData = getCombinedData();
+  const combinedRevenue = combinedData.reduce((a,d) => a + d.Revenue, 0);
+  const target = getTarget(CURRENT_FY, CURRENT_ENTITY) || getTarget(CURRENT_FY, 'combined');
+  const targetLabel = target ? `₹ ${target.toLocaleString('en-IN')}` : 'Update Targets tab';
+  const gap = target ? Math.max(target - totalRev, 0) : 0;
+  const gapLabel = target ? fmt(gap) : 'No target set';
+  const pctOfTarget = target ? Math.round(totalRev / target * 100) : 0;
+
+  document.getElementById('kpi-revenue').textContent = fmt(totalRev);
+  document.getElementById('kpi-revenue-exact').textContent = '₹ ' + totalRev.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+  document.getElementById('kpi-gross-exact').textContent = '₹ ' + totalGross.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+  document.getElementById('kpi-avg-exact').textContent = '₹ ' + avgInvoiceValue.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+  document.getElementById('kpi-gross').textContent = fmt(totalGross);
+  document.getElementById('kpi-orders').textContent = uniqueInvoices.length;
+  document.getElementById('kpi-avg').textContent = fmt(avgInvoiceValue);
+  document.getElementById('kpi-combined').textContent = fmt(combinedRevenue);
+  document.getElementById('kpi-combined-exact').textContent = '₹ ' + combinedRevenue.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+  document.getElementById('kpi-target').textContent = target ? fmt(target) : '—';
+  document.getElementById('kpi-target-exact').textContent = targetLabel;
+  document.getElementById('kpi-gap').textContent = target ? fmt(gap) : '—';
+  document.getElementById('kpi-gap-exact').textContent = target ? `${pctOfTarget}% of target` : gapLabel;
+}
+
+// ============================================================
+// MONTHLY TREND
+// ============================================================
+function updateMonthly(data) {
+  const map = {};
+  data.forEach(d => {
+    if (!map[d.Month]) map[d.Month] = {label: d.MonthName, rev: 0, gross: 0};
+    map[d.Month].rev += d.Revenue;
+    map[d.Month].gross += d.GrossTotal;
+  });
+  const months = Object.keys(map).sort();
+  const labels = months.map(m => map[m].label);
+  const revs = months.map(m => map[m].rev);
+
+  if (charts.monthly) charts.monthly.destroy();
+  charts.monthly = new Chart(document.getElementById('chart-monthly'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Revenue (₹)',
+        data: revs,
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59,130,246,0.08)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#3b82f6',
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: { label: ctx => ' ' + fmtFull(ctx.raw) },
+        backgroundColor: getChartTheme().tooltip.bg, titleColor: getChartTheme().tooltip.title, bodyColor: getChartTheme().tooltip.body, borderColor: getChartTheme().tooltip.border, borderWidth: 1
+      }},
+      scales: {
+        x: { grid: { color: getChartTheme().grid }, ticks: { color: getChartTheme().tick, font: { size: 11 } } },
+        y: { grid: { color: getChartTheme().grid }, ticks: { color: getChartTheme().tick, font: { size: 11 }, callback: v => fmt(v) } }
+      }
+    }
+  });
+}
+
+function updateEntityCompareChart() {
+  const compareData = getCombinedData();
+  const map = { mce: {}, ma: {} };
+  compareData.forEach(d => {
+    if (!map[d.Entity]) return;
+    map[d.Entity][d.Month] = (map[d.Entity][d.Month] || 0) + d.Revenue;
+  });
+  const months = [...new Set([...Object.keys(map.mce), ...Object.keys(map.ma)])].sort();
+  const labels = months.map(m => {
+    const date = new Date(m + '-01');
+    return date.toLocaleString('en-IN', { month: 'short', year: 'numeric' });
+  });
+  const mceValues = months.map(m => map.mce[m] || 0);
+  const maValues = months.map(m => map.ma[m] || 0);
+
+  if (charts.entityCompare) charts.entityCompare.destroy();
+  charts.entityCompare = new Chart(document.getElementById('chart-entity-compare'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'MCE',
+          data: mceValues,
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59,130,246,0.08)',
+          tension: 0.35,
+          pointRadius: 4,
+          borderWidth: 2.5
+        },
+        {
+          label: 'MA',
+          data: maValues,
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245,158,11,0.12)',
+          tension: 0.35,
+          pointRadius: 4,
+          borderWidth: 2.5
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: getChartTheme().legend } }, tooltip: {
+        callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fmtFull(ctx.raw)}` },
+        backgroundColor: getChartTheme().tooltip.bg, titleColor: getChartTheme().tooltip.title, bodyColor: getChartTheme().tooltip.body, borderColor: getChartTheme().tooltip.border, borderWidth: 1
+      }},
+      scales: {
+        x: { grid: { color: getChartTheme().grid }, ticks: { color: getChartTheme().tick, font: { size: 10 } } },
+        y: { grid: { color: getChartTheme().grid }, ticks: { color: getChartTheme().tick, font: { size: 10 }, callback: v => fmt(v) } }
+      }
+    }
+  });
+}
+
+function updateGrowthChart(data) {
+  const map = {};
+  data.forEach(d => {
+    if (!map[d.Month]) map[d.Month] = 0;
+    map[d.Month] += d.Revenue;
+  });
+  const months = Object.keys(map).sort();
+  const labels = months.map(m => new Date(m + '-01').toLocaleString('en-IN', { month: 'short', year: 'numeric' }));
+  const growth = months.map((m, index) => {
+    if (index === 0) return 0;
+    const prev = map[months[index - 1]];
+    return prev ? (map[m] - prev) / prev * 100 : 0;
+  });
+
+  if (charts.growth) charts.growth.destroy();
+  charts.growth = new Chart(document.getElementById('chart-growth'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'MoM Growth %',
+        data: growth,
+        backgroundColor: growth.map(value => value >= 0 ? 'rgba(6,214,160,0.7)' : 'rgba(239,68,68,0.7)'),
+        borderRadius: 4,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: { label: ctx => ` ${ctx.raw.toFixed(1)}%` },
+        backgroundColor: getChartTheme().tooltip.bg, titleColor: getChartTheme().tooltip.title, bodyColor: getChartTheme().tooltip.body, borderColor: getChartTheme().tooltip.border, borderWidth: 1
+      }},
+      scales: {
+        x: { grid: { color: getChartTheme().grid }, ticks: { color: getChartTheme().tick, font: { size: 10 } } },
+        y: { grid: { color: getChartTheme().grid }, ticks: { color: getChartTheme().tick, font: { size: 10 }, callback: v => `${v}%` } }
+      }
+    }
+  });
+}
+
+function updateBusinessInsights(data) {
+  const combinedData = getCombinedData();
+  const totalRev = data.reduce((a,d) => a + d.Revenue, 0);
+  const combinedRevenue = combinedData.reduce((a,d) => a + d.Revenue, 0);
+  const target = getTarget(CURRENT_FY, CURRENT_ENTITY) || getTarget(CURRENT_FY, 'combined');
+  const gap = target ? Math.max(target - totalRev, 0) : 0;
+
+  const productMap = {};
+  const customerMap = {};
+  data.forEach(d => {
+    productMap[d.Product] = (productMap[d.Product] || 0) + d.Revenue;
+    customerMap[d.Customer] = (customerMap[d.Customer] || 0) + d.Revenue;
+  });
+  const topProduct = Object.entries(productMap).sort((a,b)=>b[1]-a[1])[0] || ['None', 0];
+  const topCustomer = Object.entries(customerMap).sort((a,b)=>b[1]-a[1])[0] || ['None', 0];
+
+  const currentMonth = Object.keys(productMap).length ? Object.keys(productMap)[0] : null;
+  const lastThree = Object.entries(productMap).sort((a,b)=>b[1]-a[1]).slice(0,3);
+
+  const targetText = target ? `${fmt(totalRev)} of ${fmt(target)} (${Math.round(totalRev/target*100)}%)` : 'No yearly target set yet.';
+  const shortfallText = target ? `Shortfall: ${fmt(gap)}` : 'Add target values to the Targets tab.';
+
+  document.getElementById('insights-body').innerHTML = `
+    <div><strong>Top product:</strong> ${topProduct[0]} (${fmt(topProduct[1])})</div>
+    <div><strong>Top customer:</strong> ${topCustomer[0]} (${fmt(topCustomer[1])})</div>
+    <div><strong>Combined FY value:</strong> ${fmt(combinedRevenue)}</div>
+    <div><strong>Target progress:</strong> ${targetText}</div>
+    <div><strong>${shortfallText}</strong></div>
+    <div style="color:var(--muted);font-size:0.82rem;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);">Define yearly target in an Excel tab named <code>Targets</code> with columns <code>FY</code>, <code>Entity</code>, <code>Target</code>.</div>
+  `;
+}
+
+// ============================================================
+// PRODUCT PIE
+// ============================================================
+function updateProductPie(data) {
+  const map = {};
+  data.forEach(d => { map[d.Product] = (map[d.Product] || 0) + d.Revenue; });
+  const sorted = Object.entries(map).sort((a,b)=>b[1]-a[1]);
+  const labels = sorted.map(e=>e[0]);
+  const values = sorted.map(e=>e[1]);
+
+  if (charts.productPie) charts.productPie.destroy();
+  charts.productPie = new Chart(document.getElementById('chart-product-pie'), {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data: values, backgroundColor: COLORS, borderColor: '#111520', borderWidth: 2, hoverOffset: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: {
+        legend: { position: 'right', labels: { color: getChartTheme().legend, font: { size: 11 }, boxWidth: 10, padding: 10 } },
+        tooltip: {
+          callbacks: { label: ctx => ` ${ctx.label}: ${fmt(ctx.raw)} (${(ctx.raw/values.reduce((a,b)=>a+b,0)*100).toFixed(1)}%)` },
+          backgroundColor: getChartTheme().tooltip.bg, titleColor: getChartTheme().tooltip.title, bodyColor: getChartTheme().tooltip.body, borderColor: getChartTheme().tooltip.border, borderWidth: 1
+        }
+      }
+    }
+  });
+}
+
+// ============================================================
+// PRODUCT BAR
+// ============================================================
+function updateProductBar(data) {
+  const map = {};
+  data.forEach(d => { map[d.Product] = (map[d.Product] || 0) + d.Revenue; });
+  const sorted = Object.entries(map).sort((a,b)=>b[1]-a[1]);
+  const labels = sorted.map(e=>e[0]);
+  const values = sorted.map(e=>e[1]);
+
+  if (charts.productBar) charts.productBar.destroy();
+  charts.productBar = new Chart(document.getElementById('chart-product-bar'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Revenue',
+        data: values,
+        backgroundColor: COLORS.slice(0, labels.length),
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: { label: ctx => ' ' + fmtFull(ctx.raw) },
+        backgroundColor: '#1e293b', bodyColor: '#e8eaf0', borderColor: '#334155', borderWidth: 1
+      }},
+      scales: {
+        x: { grid: { color: getChartTheme().grid }, ticks: { color: getChartTheme().tick, font: { size: 10 }, callback: v => fmt(v) } },
+        y: { grid: { display: false }, ticks: { color: getChartTheme().legend, font: { size: 11 } } }
+      }
+    }
+  });
+}
+
+// ============================================================
+// CUSTOMERS BAR
+// ============================================================
+function updateCustomers(data) {
+  const map = {};
+  data.forEach(d => { map[d.Customer] = (map[d.Customer] || 0) + d.Revenue; });
+  const sorted = Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const labels = sorted.map(e => e[0].length > 25 ? e[0].substring(0,24)+'…' : e[0]);
+  const values = sorted.map(e=>e[1]);
+
+  if (charts.customers) charts.customers.destroy();
+  charts.customers = new Chart(document.getElementById('chart-customers'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: 'rgba(245,158,11,0.7)',
+        hoverBackgroundColor: '#f59e0b',
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: { label: ctx => ' ' + fmtFull(ctx.raw) },
+        backgroundColor: '#1e293b', bodyColor: '#e8eaf0', borderColor: '#334155', borderWidth: 1
+      }},
+      scales: {
+        x: { grid: { color: getChartTheme().grid }, ticks: { color: getChartTheme().tick, font: { size: 10 }, callback: v => fmt(v) } },
+        y: { grid: { display: false }, ticks: { color: getChartTheme().legend, font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+// ============================================================
+// GST PIE
+// ============================================================
+function updateGSTPie(data) {
+  // Approximate: IGST is for interstate, CGST+SGST for intrastate
+  // TotalGST = CGST+SGST+IGST; differentiate by GSTIN prefix
+  let cgstSgst = 0, igst = 0, none = 0;
+  data.forEach(d => {
+    const gstin = d['GSTIN/UIN'] || '';
+    if (!gstin) { none += d.TotalGST; return; }
+    const stateCode = gstin.substring(0,2);
+    if (stateCode === '27') cgstSgst += d.TotalGST; // Maharashtra = 27
+    else igst += d.TotalGST;
+  });
+
+  if (charts.gstPie) charts.gstPie.destroy();
+  charts.gstPie = new Chart(document.getElementById('chart-gst-pie'), {
+    type: 'pie',
+    data: {
+      labels: ['CGST + SGST (Intrastate)', 'IGST (Interstate)', 'Export / Nil'],
+      datasets: [{ data: [cgstSgst, igst, none], backgroundColor: ['#3b82f6','#f59e0b','#6b7280'], borderColor: '#111520', borderWidth: 2, hoverOffset: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: getChartTheme().legend, font: { size: 10 }, boxWidth: 10, padding: 8 } },
+        tooltip: {
+          callbacks: { label: ctx => ` ${ctx.label}: ${fmtFull(ctx.raw)}` },
+          backgroundColor: '#1e293b', bodyColor: '#e8eaf0', borderColor: '#334155', borderWidth: 1
+        }
+      }
+    }
+  });
+}
+
+// ============================================================
+// COUNT CHART
+// ============================================================
+function updateCountChart(data) {
+  const map = {};
+  data.forEach(d => {
+    if (!map[d.Month]) map[d.Month] = {label: d.MonthName, count: 0};
+    map[d.Month].count++;
+  });
+  const months = Object.keys(map).sort();
+  const labels = months.map(m => map[m].label);
+  const counts = months.map(m => map[m].count);
+
+  if (charts.count) charts.count.destroy();
+  charts.count = new Chart(document.getElementById('chart-count'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Invoices',
+        data: counts,
+        backgroundColor: 'rgba(168,85,247,0.6)',
+        hoverBackgroundColor: '#a855f7',
+        borderRadius: 5,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: { label: ctx => ` ${ctx.raw} invoices` },
+        backgroundColor: '#1e293b', bodyColor: '#e8eaf0', borderColor: '#334155', borderWidth: 1
+      }},
+      scales: {
+        x: { grid: { color: getChartTheme().grid }, ticks: { color: getChartTheme().tick, font: { size: 9 } } },
+        y: { grid: { color: getChartTheme().grid }, ticks: { color: getChartTheme().tick, font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+// ============================================================
+// GST STACK
+// ============================================================
+function updateGSTStack(data) {
+  const map = {};
+  data.forEach(d => {
+    if (!map[d.Month]) map[d.Month] = {label: d.MonthName, rev: 0, gst: 0};
+    map[d.Month].rev += d.Revenue;
+    map[d.Month].gst += d.TotalGST;
+  });
+  const months = Object.keys(map).sort();
+  const labels = months.map(m => map[m].label);
+  const revs = months.map(m => map[m].rev);
+  const gsts = months.map(m => map[m].gst);
+
+  if (charts.gstStack) charts.gstStack.destroy();
+  charts.gstStack = new Chart(document.getElementById('chart-gst-stack'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Taxable Value', data: revs, backgroundColor: 'rgba(6,214,160,0.7)', borderRadius: 4, borderSkipped: false, stack: 'stack0' },
+        { label: 'GST', data: gsts, backgroundColor: 'rgba(239,68,68,0.5)', borderRadius: 4, borderSkipped: false, stack: 'stack0' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: getChartTheme().legend, font: { size: 10 }, boxWidth: 10 } },
+        tooltip: {
+          callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fmtFull(ctx.raw)}` },
+          backgroundColor: '#1e293b', bodyColor: '#e8eaf0', borderColor: '#334155', borderWidth: 1
+        }
+      },
+      scales: {
+        x: { stacked: true, grid: { color: getChartTheme().grid }, ticks: { color: getChartTheme().tick, font: { size: 9 } } },
+        y: { stacked: true, grid: { color: getChartTheme().grid }, ticks: { color: getChartTheme().tick, font: { size: 10 }, callback: v => fmt(v) } }
+      }
+    }
+  });
+}
+
+// ============================================================
+// TOP 5 / BOTTOM 5
+// ============================================================
+function updateTop5Bot5(data) {
+  const map = {};
+  data.forEach(d => { map[d.Customer] = (map[d.Customer] || 0) + d.Revenue; });
+  const sorted = Object.entries(map).sort((a,b)=>b[1]-a[1]);
+  const maxRev = sorted[0]?.[1] || 1;
+
+  function renderTable(tableEl, entries, isTop) {
+    const cls = isTop ? 'rank-top top5-bar' : 'rank-bot bot5-bar';
+    const rankCls = isTop ? 'rank-top' : 'rank-bot';
+    tableEl.innerHTML = `<tr><th>#</th><th>Customer</th><th style="text-align:right">Revenue</th></tr>`;
+    entries.forEach((e, i) => {
+      const pct = (e[1] / maxRev * 100).toFixed(0);
+      const name = e[0].length > 35 ? e[0].substring(0,34) + '…' : e[0];
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><span class="rank-badge ${rankCls}">${i+1}</span></td>
+        <td>${name}<span class="bar-mini ${isTop?'top5-bar':'bot5-bar'}" style="width:${Math.max(pct,4)}px"></span></td>
+        <td style="text-align:right;font-family:'Syne',sans-serif;font-weight:600;font-size:0.82rem">${fmt(e[1])}</td>`;
+      tableEl.appendChild(tr);
+    });
+  }
+
+  renderTable(document.getElementById('top5-table'), sorted.slice(0,5), true);
+  renderTable(document.getElementById('bot5-table'), sorted.slice(-5).reverse(), false);
+}
+
+// ============================================================
+// TRANSACTION TABLE
+// ============================================================
+function updateTxnTable(data) {
+  const tbody = document.getElementById('txn-body');
+  tbody.innerHTML = '';
+  [...data].sort((a,b) => b.Date.localeCompare(a.Date)).forEach(d => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${d.Date}</td>
+      <td style="font-family:'Syne',sans-serif;font-size:0.78rem;color:var(--muted)">${d.InvoiceNo}</td>
+      <td style="font-family:'Syne',sans-serif;font-size:0.78rem;color:var(--muted)">${d.PO}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.Customer}</td>
+      <td><span class="product-tag">${d.Product}</span></td>
+      <td style="text-align:center">${d.QTY || 1}</td>
+      <td style="text-align:right;font-weight:500">${fmtFull(d.Revenue)}</td>
+      <td style="text-align:right;color:var(--accent2);font-weight:500">${fmtFull(d.GrossTotal)}</td>
+      <td style="text-align:right;color:var(--accent3)">${fmtFull(d.TotalGST)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+
+
+// ============================================================
+// THEME TOGGLE
+// ============================================================
+function getChartTheme() {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  return {
+    grid: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.04)',
+    tick: isLight ? '#64748b' : '#6b7280',
+    tooltip: {
+      bg: isLight ? '#ffffff' : '#1e293b',
+      title: isLight ? '#475569' : '#94a3b8',
+      body: isLight ? '#1e293b' : '#e8eaf0',
+      border: isLight ? '#e2e8f0' : '#334155',
+    },
+    legend: isLight ? '#475569' : '#94a3b8',
+  };
+}
+
+function applyChartTheme() {
+  const t = getChartTheme();
+  Chart.defaults.color = t.tick;
+  // Destroy and redraw all charts
+  updateAll();
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const isLight = html.getAttribute('data-theme') === 'light';
+  if (isLight) {
+    html.removeAttribute('data-theme');
+    document.getElementById('theme-label').textContent = '🌙 Dark';
+    document.querySelector('.theme-toggle-thumb').textContent = '🌙';
+    localStorage.setItem('dashboard-theme', 'dark');
+  } else {
+    html.setAttribute('data-theme', 'light');
+    document.getElementById('theme-label').textContent = '☀️ Light';
+    document.querySelector('.theme-toggle-thumb').textContent = '☀️';
+    localStorage.setItem('dashboard-theme', 'light');
+  }
+  applyChartTheme();
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('dashboard-theme');
+  if (saved === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.getElementById('theme-label').textContent = '☀️ Light';
+    document.querySelector('.theme-toggle-thumb').textContent = '☀️';
+  }
+}
+
+// ============================================================
+// ENTITY SWITCHER
+// ============================================================
+function getEntityTitle(entity) {
+  if (entity === 'mce') return 'MCE Analytics';
+  if (entity === 'ma') return 'Malgudi Associates';
+  return 'Malgudi Cranes & Equipments';
+}
+
+function switchEntity(entity) {
+  CURRENT_ENTITY = entity;
+
+  document.getElementById('btn-mce').classList.remove('active');
+  document.getElementById('btn-ma').classList.remove('active');
+  document.getElementById('btn-combined').classList.remove('active');
+  document.getElementById(`btn-${entity}`).classList.add('active');
+
+  document.querySelector('.logo').innerHTML =
+    entity === 'mce'
+      ? '<div class="logo-icon">🏗️</div> MCE Analytics'
+      : entity === 'ma'
+        ? '<div class="logo-icon">🔧</div> Malgudi Associates'
+        : '<div class="logo-icon">🏢</div> Malgudi Cranes & Equipments';
+
+  renderEntityMode();
+  applyFilters();
+}
+
+function renderEntityMode() {
+  const showCombined = CURRENT_ENTITY === 'combined';
+  document.getElementById('kpi-combined-card').style.display = showCombined ? 'block' : 'none';
+  document.getElementById('kpi-target-card').style.display = showCombined ? 'block' : 'none';
+  document.getElementById('kpi-gap-card').style.display = showCombined ? 'block' : 'none';
+  document.getElementById('combined-dashboard-section').style.display = showCombined ? 'block' : 'none';
+}
+
+function rebuildFilters() {
+  const products = [...new Set(ACTIVE_DATA.map(d => d.Product))].sort();
+  const pSel = document.getElementById('filter-product');
+  pSel.innerHTML = '<option value="">All Products</option>';
+  products.forEach(p => {
+    const o = document.createElement('option');
+    o.value = p; o.textContent = p;
+    pSel.appendChild(o);
+  });
+
+  const customers = [...new Set(ACTIVE_DATA.map(d => d.Customer))].sort();
+  const cSel = document.getElementById('filter-customer');
+  cSel.innerHTML = '<option value="">All Customers</option>';
+  customers.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c; o.textContent = c;
+    cSel.appendChild(o);
+  });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+
+initTheme();
+loadData();   // 🔥 this triggers everything
+
+
+
+['filter-from','filter-to','filter-fy','filter-product','filter-customer','filter-po'].forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (id === 'filter-fy') {
+    el.addEventListener('change', event => switchFY(event.target.value));
+  } else {
+    el.addEventListener('input', updateAll); // Use 'input' for text search to update on each keystroke
+  }
+});
+</script>
+</body>
+</html>
