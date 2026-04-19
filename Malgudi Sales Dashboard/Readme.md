@@ -1,6 +1,6 @@
 # MCE/MA Sales Dashboard 🏗️🔧
 
-[![Dashboard Preview](https://via.placeholder.com/800x400/0a0d14/ffffff?text=MCE+Sales+Dashboard)](https://htmlpreview.github.io/?https://github.com/example/mce-dashboard/MCE_MA_Sales_Dashboard.html)
+[![Dashboard Preview](https://via.placeholder.com/800x400/0a0d14/ffffff?text=MCE+Sales+Dashboard)](https://htmlpreview.github.io/?https://github.com/example/mce-dashboard/MCE_MA_Sales_Dashboard.html](https://github.com/HR014/Dashboard/blob/blackboxai/docs/Malgudi%20Sales%20Dashboard/MCE_MA_Sales_Dashboard.html)
 
 **Live, interactive sales analytics dashboard** for **MCE (Malgudi Cranes & Equipments)** and **MA (Malgudi Associates)**. Fetches real-time data from Google Sheets, renders 10+ **Chart.js** charts, **KPI cards**, filterable tables. **Zero setup** - opens in any browser.
 
