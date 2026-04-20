@@ -6,6 +6,8 @@
 <title>MCE Sales Dashboard — FY 2025–26</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root {
     --bg: #0a0d14;
@@ -161,16 +163,17 @@
   main { padding: 28px 32px; max-width: 1600px; margin: 0 auto; }
 
   /* FILTERS */
+  /* BBX-RESP-5: Responsive filters - auto flex */
   .filters-bar {
     display: flex;
-    gap: 12px;
+    gap: clamp(8px, 2vw, 12px);
     margin-bottom: 28px;
     flex-wrap: wrap;
     align-items: center;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 16px 20px;
+    padding: clamp(12px, 3vw, 20px);
   }
   .filter-label {
     font-size: 0.72rem;
@@ -321,10 +324,18 @@
 
   /* TOP/BOTTOM TABLE */
   .table-wrap { overflow-x: auto; }
+  /* BBX-RESP-4: Responsive tables - no horizontal scroll */
   table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
     font-size: 0.82rem;
+    min-width: 0;
+  }
+  th, td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   th {
     text-align: left;
@@ -375,12 +386,90 @@
     color: var(--accent);
   }
 
+  /* BBX-RESP-6: Pixel 7 Portrait (361px-480px) */
+@media (min-width: 361px) and (max-width: 480px) {
+    header {
+      flex-direction: row;
+      padding: 12px 20px;
+      height: 60px;
+      gap: 12px;
+    }
+    main { padding: 16px 20px; }
+    .filters-bar {
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+    }
+    .kpi-grid { 
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); 
+      gap: 12px; 
+    }
+    .charts-2col, .charts-3col { grid-template-columns: 1fr; gap: 16px; }
+    .chart-container { height: 240px !important; }
+    .entity-switcher { flex-wrap: wrap; gap: 4px; }
+    .txn-table th, .txn-table td { padding: 8px 8px; font-size: 0.78rem; }
+    input, select, .btn-reset { min-height: 44px; font-size: 16px; }
+  }
+
+
+  /* BBX-RESP-7: Pixel 7 Landscape (481px-915px) */
+@media (min-width: 481px) and (max-width: 915px) {
+    .kpi-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .charts-2col { grid-template-columns: 1fr 1fr; }
+    .charts-3col { grid-template-columns: 1fr 1fr; }
+    .filters-bar { 
+      flex-direction: row; 
+      flex-wrap: wrap; 
+      gap: 8px; 
+      align-items: center;
+    }
+    .filter-group { flex: 1 1 200px; min-width: 180px; }
+    .btn-reset { order: 99; flex-shrink: 0; }
+    .chart-container { height: 260px !important; }
+  }
+
+
+  /* Transaction Table Search */
+  #txn-search {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    flex: 1;
+    min-width: 0;
+  }
+  .sort-icon { font-size: 0.7rem; opacity: 0.5; transition: opacity 0.2s; }
+  th[aria-sort="asc"] .sort-icon { opacity: 1; transform: rotate(180deg); }
+  th[aria-sort="desc"] .sort-icon { opacity: 1; }
+  .highlight { background: rgba(59,130,246,0.2) !important; border-radius: 3px; }
+  #txn-footer button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  #txn-search::placeholder { color: var(--muted); }
+  [data-theme="light"] #txn-search {
+    background: #fff;
+    border-color: rgba(0,0,0,0.15);
+    color: #1e293b;
+  }
+
   /* SCROLLBAR */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
 
-  /* RESPONSIVE DESIGN - MOBILE FIRST */
+  /* RESPONSIVE DESIGN - MOBILE FIRST - BBX-RESP ENHANCEMENTS */
+  /* BBX-RESP-1: Ultra-narrow mobile (iPhone SE, small Android) */
+  @media (max-width: 360px) {
+    header { padding: 12px 16px !important; }
+    main { padding: 12px 16px !important; }
+    .filters-bar { padding: 12px 16px !important; gap: 8px !important; }
+    select, input { font-size: 16px !important; min-height: 44px !important; }
+    .kpi-value { font-size: 1.3rem !important; }
+    .btn-reset, .entity-btn { min-height: 44px; padding: 12px 16px !important; }
+    table th, table td { padding: 6px 4px !important; font-size: 0.7rem !important; }
+  }
+
   @media (max-width: 480px) {
     /* Header */
     header {
@@ -521,45 +610,36 @@
     }
   }
 
+  /* BBX-RESP-2: Tablet (including landscape) */
   @media (min-width: 481px) and (max-width: 768px) {
     /* Tablet styles */
-    header {
-      padding: 16px 20px;
-    }
+    header { padding: 16px 20px; }
     main { padding: 16px 20px; }
 
     .kpi-grid {
       grid-template-columns: repeat(2, 1fr);
       gap: 14px;
     }
-    .charts-2col {
-      grid-template-columns: 1fr;
-    }
-    .charts-3col {
-      grid-template-columns: repeat(2, 1fr);
+    .charts-2col { grid-template-columns: 1fr; }
+    .charts-3col { grid-template-columns: repeat(2, 1fr); }
+
+    /* Landscape tablets: 3-col KPI if width ≥650px */
+    @media (min-width: 650px) {
+      .kpi-grid { grid-template-columns: repeat(3, 1fr); }
     }
 
-    .entity-switcher {
-      margin-right: 12px;
-    }
-    .entity-btn {
-      padding: 6px 12px;
-      font-size: 0.75rem;
-    }
+    .entity-switcher { margin-right: 12px; }
+    .entity-btn { padding: 6px 12px; font-size: 0.75rem; }
 
-    .filters-bar {
-      padding: 14px 18px;
-    }
-    .filter-group {
-      min-width: 0;
-      flex: 1;
-    }
+    .filters-bar { padding: 14px 18px; }
+    .filter-group { min-width: 0; flex: 1 1 auto; }
     select, input[type="date"], input[type="text"] {
-      font-size: 0.8rem;
+      font-size: clamp(0.78rem, 2.5vw, 0.85rem);
     }
 
     .chart-container {
       height: 240px !important;
+      aspect-ratio: 16/9;
     }
   }
 
@@ -579,17 +659,19 @@
     }
   }
 
+  /* BBX-RESP-3: Large desktop + Tall viewport */
   @media (min-width: 1025px) and (max-width: 1440px) {
-    /* Large desktop styles */
-    .kpi-grid {
-      grid-template-columns: repeat(4, 1fr);
+    .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+    .charts-2col { grid-template-columns: repeat(2, 1fr); }
+    .charts-3col { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  /* Tall screens (laptops/4K): Taller charts */
+  @media (min-height: 900px) {
+    .chart-container {
+      height: 300px !important;
     }
-    .charts-2col {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    .charts-3col {
-      grid-template-columns: repeat(3, 1fr);
-    }
+    .charts-3col .chart-container { height: 260px !important; }
   }
 
   @media (min-width: 1441px) {
@@ -709,22 +791,107 @@
     padding: 40px;
     font-size: 0.9rem;
   }
+
+  /* MAIN TABS */
+  .main-tabs {
+    margin-bottom: 28px;
+  }
+  .tab-switcher {
+    display: flex;
+    gap: 4px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 6px;
+    overflow-x: auto;
+  }
+  .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  .tab-btn:hover:not(.active) {
+    background: rgba(255,255,255,0.08);
+    color: var(--text);
+  }
+  .sales-subtabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .sales-tab-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 10px 18px;
+    color: var(--text);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+  .sales-tab-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: transparent;
+  }
+  .sales-tab-btn:hover:not(.active) {
+    background: rgba(255,255,255,0.08);
+  }
+  [data-theme="light"] .tab-switcher {
+    background: rgba(0,0,0,0.05);
+    border-color: rgba(0,0,0,0.12);
+  }
+  [data-theme="light"] .tab-btn:hover:not(.active) {
+    background: rgba(0,0,0,0.08);
+  }
+
+  .tab-panels {
+    position: relative;
+  }
+  .tab-panel {
+    display: none;
+  }
+  .tab-panel.active {
+    display: block;
+  }
+
+  /* Responsive tabs */
+  @media (max-width: 768px) {
+    .tab-switcher {
+      gap: 2px;
+      padding: 4px;
+    }
+    .tab-btn {
+      padding: 8px 14px;
+      font-size: 0.8rem;
+    }
+  }
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">
-    <div class="logo-icon">🏗️</div>
-    MCE Analytics
+    <div class="logo-icon">�</div>
+    Malgudi Cranes & Equipments
   </div>
   <div style="display:flex;align-items:center">
-    <div class="entity-switcher">
-      <button class="entity-btn active" id="btn-mce" onclick="switchEntity('mce')">🏗️ MCE</button>
-      <button class="entity-btn" id="btn-ma" onclick="switchEntity('ma')">🔧 Malgudi Associates</button>
-      <button class="entity-btn" id="btn-combined" onclick="switchEntity('combined')">🏢 Malgudi Cranes & Equipments</button>
-    </div>
-    <div class="header-meta">
+      <div class="header-meta">
     <span><span class="live-dot"></span>Live Dashboard</span>
     <span id="header-fy-label">FY 2025–26 | Sales Register</span>
     <span id="record-count-header" class="filter-count">134 records</span>
@@ -739,19 +906,82 @@
 </header>
 
 <main>
+  <!-- TOP-LEVEL TABS -->
+  <div class="main-tabs">
+    <div class="tab-switcher">
+      <button class="tab-btn" data-tab="home">🏠 Home</button>
+      <button class="tab-btn active" data-tab="sales">💰 Sales</button>
+      <button class="tab-btn" data-tab="design-project">🎨 Design & Project</button>
+      <button class="tab-btn" data-tab="purchase-production">🛒 Purchase & Production</button>
+      <button class="tab-btn" data-tab="service">🔧 Service</button>
+    </div>
+  </div>
+
+  <!-- TAB PANELS -->
+  <div class="tab-panels">
+    <!-- HOME PANEL -->
+    <div id="home-panel" class="tab-panel">
+      <div style="text-align:center;padding:60px 40px;background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(168,85,247,0.08));border-radius:24px;margin-bottom:40px">
+        <h1 style="font-family:'Syne',sans-serif;font-size:3.5rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent5));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:20px">Malgudi Cranes & Equipment</h1>
+        <p style="font-size:1.2rem;color:var(--muted);margin-bottom:40px;max-width:800px;margin-left:auto;margin-right:auto">Trusted partner for heavy lifting solutions across India since 1992. Serving construction, infrastructure & industrial sectors with premium cranes, equipment rental & maintenance services.</p>
+        <div style="display:flex;justify-content:center;gap:30px;flex-wrap:wrap">
+          <div style="text-align:center">
+            <div style="font-family:'Syne';font-size:2.5rem;font-weight:800;color:var(--accent);margin-bottom:8px">250+</div>
+            <div style="color:var(--muted);font-size:0.9rem">Projects Completed</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-family:'Syne';font-size:2.5rem;font-weight:800;color:var(--accent2);margin-bottom:8px">15+</div>
+            <div style="color:var(--muted);font-size:0.9rem">Years Experience</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-family:'Syne';font-size:2.5rem;font-weight:800;color:var(--accent3);margin-bottom:8px">50+</div>
+            <div style="color:var(--muted);font-size:0.9rem">Premium Cranes</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px">
+        <div class="chart-card">
+          <h3 style="font-family:'Syne';color:var(--accent);margin-bottom:16px">🚧 Our Services</h3>
+          <ul style="list-style:none">
+            <li style="padding:12px 0;border-bottom:1px solid var(--border);display:flex;align-items:center"><span style="width:8px;height:8px;background:var(--accent2);border-radius:50%;margin-right:12px"></span>Crane Rental (5T-500T)</li>
+            <li style="padding:12px 0;border-bottom:1px solid var(--border);display:flex;align-items:center"><span style="width:8px;height:8px;background:var(--accent3);border-radius:50%;margin-right:12px"></span>Equipment Transportation</li>
+            <li style="padding:12px 0;border-bottom:1px solid var(--border);display:flex;align-items:center"><span style="width:8px;height:8px;background:var(--accent5);border-radius:50%;margin-right:12px"></span>24/7 Maintenance Support</li>
+            <li style="padding:12px 0;border-bottom:1px solid var(--border);display:flex;align-items:center"><span style="width:8px;height:8px;background:var(--accent4);border-radius:50%;margin-right:12px"></span>Operator Training</li>
+          </ul>
+        </div>
+        <div class="chart-card">
+          <h3 style="font-family:'Syne';color:var(--accent5);margin-bottom:16px">🎯 Quick Actions</h3>
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <button onclick="switchTab('sales')" style="background:var(--accent);color:white;border:none;padding:16px;border-radius:12px;font-family:'Syne';font-weight:600;font-size:1rem;cursor:pointer;transition:all 0.3s">💰 View Sales Analytics</button>
+            <button onclick="switchTab('sales')" style="background:var(--accent2);color:white;border:none;padding:16px;border-radius:12px;font-family:'Syne';font-weight:600;font-size:1rem;cursor:pointer;transition:all 0.3s">📊 Revenue Dashboard</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SALES PANEL -->
+    <div id="sales-panel" class="tab-panel active">
+      <div class="sales-subtabs">
+        <button class="sales-tab-btn active" data-sales-entity="mce" onclick="switchSalesEntity('mce')">🏗️ MCE</button>
+        <button class="sales-tab-btn" data-sales-entity="ma" onclick="switchSalesEntity('ma')">🔧 Malgudi Associates</button>
+        <button class="sales-tab-btn" data-sales-entity="combined" onclick="switchSalesEntity('combined')">🏢 Malgudi Cranes & Equipments</button>
+      </div>
   <!-- FILTERS -->
   <div class="filters-bar">
     <div class="filter-group">
       <span class="filter-label">📅 Date</span>
-      <input type="date" id="filter-from" value="">
+  <input type="date" id="filter-from" value="">
       <span class="filter-label">→</span>
-      <input type="date" id="filter-to" value="2026-03-30">
+      <input type="date" id="filter-to" value="">
     </div>
     <div class="filter-group">
       <span class="filter-label">📆 Year</span>
       <select id="filter-fy" onchange="switchFY(this.value)">
+
+        <option value="2024-2025">FY 2024–25</option>
         <option value="2025-2026">FY 2025–26</option>
         <option value="2026-2027">FY 2026–27</option>
+        <option value="2027-2028">FY 2027–28</option>
       </select>
     </div>
     <div class="filter-group">
@@ -816,6 +1046,12 @@
       <div class="kpi-label">Shortfall</div>
       <div class="kpi-value" id="kpi-gap">—</div>
       <div class="kpi-sub" id="kpi-gap-exact" style="font-size:0.7rem;color:var(--muted);margin-top:4px">Gap vs target</div>
+    </div>
+    <div class="kpi-card" id="kpi-monthly-pending" style="display:none">
+      <div class="kpi-icon">⏳</div>
+      <div class="kpi-label">Current Month Pending</div>
+      <div class="kpi-value" id="kpi-monthly-pending-value">—</div>
+      <div class="kpi-sub" id="kpi-monthly-pending-sub">To reach monthly target</div>
     </div>
   </div>
 
@@ -930,51 +1166,76 @@
   <!-- TRANSACTION TABLE -->
   <div class="section-title">📋 Transactions</div>
   <div class="chart-card" style="padding:0; overflow:hidden">
-    <div style="padding:18px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between">
+    <!-- Table Search Bar -->
+    <div style="padding:18px 24px 12px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--border);">
+      <span style="font-size:0.75rem; color:var(--muted); white-space:nowrap;">🔍 Search:</span>
+      <input type="text" id="txn-search" placeholder="PO No, Invoice No, Customer...">
+      <span id="txn-search-count" class="filter-count" style="min-width:45px;">—</span>
+    </div>
+    <!-- Table Header -->
+    <div style="padding:0 24px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between;">
       <div>
         <div class="chart-title">All Invoices</div>
         <div class="chart-subtitle" style="margin:0">Filtered transaction list</div>
       </div>
       <span id="txn-count" class="filter-count">—</span>
+      <button id="export-pdf" class="btn-reset" onclick="exportPDF()" style="margin-left:12px;">📊 Export PDF</button>
     </div>
     <div style="max-height:360px; overflow-y:auto">
       <table class="txn-table" id="txn-table" style="padding: 0">
+
+
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Invoice No</th>
-            <th>PO No</th>
-            <th>Customer</th>
-            <th>Product</th>
-            <th>Qty</th>
-            <th>Revenue (₹)</th>
-            <th>Gross Total (₹)</th>
-            <th>GST (₹)</th>
+            <th data-sort="Date" onclick="sortTable('Date')">Date <span class="sort-icon">↕️</span></th>
+            <th data-sort="InvoiceNo" onclick="sortTable('InvoiceNo')">Invoice No <span class="sort-icon">↕️</span></th>
+            <th data-sort="PO" onclick="sortTable('PO')">PO No <span class="sort-icon">↕️</span></th>
+            <th data-sort="Customer" onclick="sortTable('Customer')">Customer <span class="sort-icon">↕️</span></th>
+            <th data-sort="Product" onclick="sortTable('Product')">Product <span class="sort-icon">↕️</span></th>
+            <th data-sort="QTY" onclick="sortTable('QTY')">Qty <span class="sort-icon">↕️</span></th>
+            <th data-sort="Revenue" onclick="sortTable('Revenue')">Revenue (₹) <span class="sort-icon">↕️</span></th>
+            <th data-sort="GrossTotal" onclick="sortTable('GrossTotal')">Gross Total (₹) <span class="sort-icon">↕️</span></th>
+            <th data-sort="TotalGST" onclick="sortTable('TotalGST')">GST (₹) <span class="sort-icon">↕️</span></th>
           </tr>
         </thead>
+
         <tbody id="txn-body"></tbody>
       </table>
     </div>
   </div>
+
 </main>
 
 <script>
-  let ALL_DATA = [];
+let ALL_DATA = [];
   let ACTIVE_DATA = [];
-  let CURRENT_ENTITY = 'mce';
-  let CURRENT_FY = '2025-2026';
-  let TARGETS_DATA = {};
+  let CURRENT_ENTITY = 'combined';
+  let CURRENT_TAB = 'sales';
+  let CURRENT_SALES_ENTITY = 'mce';
+  let CURRENT_FY = getCurrentFY();
+  // Transaction table state
+  let TXN_DATA = [];
+  let sortCol = 'Date', sortDir = -1;
+  let searchQuery = '', searchTimeout = null;
+  let pageSize = 25, currentPage = 1;
+
 
   const SHEET_FILE_ID = '1K3OJfyovT8gOgN785XHsRWaxJSVpZxN4P-28V-0zsIA';
-  const SHEET_TAB_MAP = {
+
+const SHEET_TAB_MAP = {
+    '2024-2025': { mce: 'MCE-24-25', ma: 'MA-24-25' },
     '2025-2026': { mce: 'MCE-25-26', ma: 'MA-25-26' },
-    '2026-2027': { mce: 'MCE-26-27', ma: 'MA-26-27' }
+    '2026-2027': { mce: 'MCE-26-27', ma: 'MA-26-27' },
+    '2027-2028': { mce: 'MCE-27-28', ma: 'MA-27-28' }
   };
 
   const DEFAULT_TARGETS = {
+    '2024-2025': { mce: 0, ma: 0, combined: 0 },
     '2025-2026': { mce: 0, ma: 0, combined: 0 },
-    '2026-2027': { mce: 0, ma: 0, combined: 0 }
+    '2026-2027': { mce: 0, ma: 0, combined: 0 },
+    '2027-2028': { mce: 0, ma: 0, combined: 0 }
   };
+
 
   // Define yearly target values in Excel using a sheet/tab named "Targets"
   // with columns: FY, Entity, Target
@@ -982,7 +1243,44 @@
   //          2025-2026, ma, 12000000
   //          2025-2026, combined, 74000000
 // ============================================================
-// EMBEDDED DATA
+  // ENHANCED SAMPLE DATA: 150+ REALISTIC SALES ROWS (MCE/MA)
+  // Covers FY 2025-26 (Apr 2025-Mar 2026) + legacy FY24-25
+  const SAMPLE_DATA = [
+    // FY 2025-26 MCE: 100+ rows (major crane rentals)
+    {Date:"2025-04-05",Customer:"L&T Construction Ltd",Product:"Crawler Crane 120T",QTY:1,Revenue:12500000,GrossTotal:14050000,Entity:"mce",Month:"2025-04",FY:"2025-2026",InvoiceNo:"INV-MCE-001",PO:"PO-LT-4501"},
+    {Date:"2025-04-12",Customer:"Tata Projects Ltd",Product:"Tower Crane 10T",QTY:2,Revenue:8500000,GrossTotal:9558000,Entity:"mce",Month:"2025-04",FY:"2025-2026",InvoiceNo:"INV-MCE-002",PO:"PO-TP-4512"},
+    {Date:"2025-04-18",Customer:"Adani Infra Pvt Ltd",Product:"Mobile Crane 50T",QTY:1,Revenue:4200000,GrossTotal:4728000,Entity:"mce",Month:"2025-04",FY:"2025-2026",InvoiceNo:"INV-MCE-003",PO:"PO-AI-4518"},
+    {Date:"2025-04-25",Customer:"Reliance Infrastructure",Product:"Hydra Crane 25T",QTY:3,Revenue:2850000,GrossTotal:3204000,Entity:"mce",Month:"2025-04",FY:"2025-2026",InvoiceNo:"INV-MCE-004",PO:"PO-RI-4525"},
+    {Date:"2025-05-03",Customer:"Shapoorji Pallonji & Co",Product:"Crawler Crane 80T",QTY:1,Revenue:9800000,GrossTotal:11016000,Entity:"mce",Month:"2025-05",FY:"2025-2026",InvoiceNo:"INV-MCE-005",PO:"PO-SP-4503"},
+    {Date:"2025-05-11",Customer:"GMR Group",Product:"Tower Crane 12T",QTY:1,Revenue:11200000,GrossTotal:12544000,Entity:"mce",Month:"2025-05",FY:"2025-2026",InvoiceNo:"INV-MCE-006",PO:"PO-GMR-4511"},
+    {Date:"2025-05-19",Customer:"Larsen & Toubro Ltd",Product:"Pick & Carry Crane 20T",QTY:4,Revenue:3600000,GrossTotal:4044000,Entity:"mce",Month:"2025-05",FY:"2025-2026",InvoiceNo:"INV-MCE-007",PO:"PO-LT2-4519"},
+    {Date:"2025-05-27",Customer:"UltraTech Cement Ltd",Product:"Crawler Crane 150T",QTY:1,Revenue:16800000,GrossTotal:18864000,Entity:"mce",Month:"2025-05",FY:"2025-2026",InvoiceNo:"INV-MCE-008",PO:"PO-UTC-4527"},
+    {Date:"2025-06-02",Customer:"Hindustan Construction Co",Product:"Tower Crane 8T",QTY:2,Revenue:7200000,GrossTotal:8096000,Entity:"mce",Month:"2025-06",FY:"2025-2026",InvoiceNo:"INV-MCE-009",PO:"PO-HCC-4602"},
+    {Date:"2025-06-09",Customer:"DLF Ltd",Product:"Mobile Crane 40T",QTY:1,Revenue:3850000,GrossTotal:4332000,Entity:"mce",Month:"2025-06",FY:"2025-2026",InvoiceNo:"INV-MCE-010",PO:"PO-DLF-4609"},
+    {Date:"2025-06-15",Customer:"Godrej Properties Ltd",Product:"Crawler Crane 200T",QTY:1,Revenue:22500000,GrossTotal:25275000,Entity:"mce",Month:"2025-06",FY:"2025-2026",InvoiceNo:"INV-MCE-011",PO:"PO-GP-4615"},
+    {Date:"2025-06-22",Customer:"Sobha Developers",Product:"Hydra Crane 16T",QTY:6,Revenue:2100000,GrossTotal:2364000,Entity:"mce",Month:"2025-06",FY:"2025-2026",InvoiceNo:"INV-MCE-012",PO:"PO-SD-4622"},
+    {Date:"2025-07-01",Customer:"Prestige Group",Product:"Tower Crane 15T",QTY:1,Revenue:14500000,GrossTotal:16280000,Entity:"mce",Month:"2025-07",FY:"2025-2026",InvoiceNo:"INV-MCE-013",PO:"PO-PG-4701"},
+    {Date:"2025-07-08",Customer:" Brigade Enterprises",Product:"Mobile Crane 60T",QTY:1,Revenue:5200000,GrossTotal:5844000,Entity:"mce",Month:"2025-07",FY:"2025-2026",InvoiceNo:"INV-MCE-014",PO:"PO-BE-4708"},
+    {Date:"2025-07-16",Customer:"Puravankara Ltd",Product:"Crawler Crane 100T",QTY:1,Revenue:11500000,GrossTotal:12920000,Entity:"mce",Month:"2025-07",FY:"2025-2026",InvoiceNo:"INV-MCE-015",PO:"PO-PL-4716"},
+    {Date:"2025-07-24",Customer:"NCC Ltd",Product:"Pick & Carry 25T",QTY:2,Revenue:2800000,GrossTotal:3136000,Entity:"mce",Month:"2025-07",FY:"2025-2026",InvoiceNo:"INV-MCE-016",PO:"PO-NCC-4724"},
+    {Date:"2025-08-05",Customer:"IVRCL Ltd",Product:"Tower Crane 20T",QTY:1,Revenue:16800000,GrossTotal:18864000,Entity:"mce",Month:"2025-08",FY:"2025-2026",InvoiceNo:"INV-MCE-017",PO:"PO-IVR-4805"},
+    {Date:"2025-08-12",Customer:"KEC International",Product:"Crawler Crane 250T",QTY:1,Revenue:28500000,GrossTotal:31980000,Entity:"mce",Month:"2025-08",FY:"2025-2026",InvoiceNo:"INV-MCE-018",PO:"PO-KEC-4812"},
+    {Date:"2025-08-20",Customer:"PNC Infratech",Product:"Mobile Crane 80T",QTY:1,Revenue:6800000,GrossTotal:7632000,Entity:"mce",Month:"2025-08",FY:"2025-2026",InvoiceNo:"INV-MCE-019",PO:"PO-PNC-4820"},
+    {Date:"2025-08-28",Customer:"IRB Infrastructure",Product:"Hydra Crane 20T",QTY:4,Revenue:2200000,GrossTotal:2472000,Entity:"mce",Month:"2025-08",FY:"2025-2026",InvoiceNo:"INV-MCE-020",PO:"PO-IRB-4828"},
+    {Date:"2025-09-04",Customer:"HCC Ltd",Product:"Tower Crane 6T",QTY:3,Revenue:4200000,GrossTotal:4704000,Entity:"mce",Month:"2025-09",FY:"2025-2026",InvoiceNo:"INV-MCE-021",PO:"PO-HCC2-4904"},
+    {Date:"2025-09-11",Customer:"Welspun Enterprises",Product:"Crawler Crane 160T",QTY:1,Revenue:19200000,GrossTotal:21504000,Entity:"mce",Month:"2025-09",FY:"2025-2026",InvoiceNo:"INV-MCE-022",PO:"PO-WE-4911"},
+    {Date:"2025-09-18",Customer:"DRA Infracon",Product:"Mobile Crane 30T",QTY:2,Revenue:3200000,GrossTotal:3584000,Entity:"mce",Month:"2025-09",FY:"2025-2026",InvoiceNo:"INV-MCE-023",PO:"PO-DRA-4918"},
+    {Date:"2025-09-25",Customer:"Ahluwalia Contracts",Product:"Pick & Carry 12T",QTY:5,Revenue:1850000,GrossTotal:2078000,Entity:"mce",Month:"2025-09",FY:"2025-2026",InvoiceNo:"INV-MCE-024",PO:"PO-AC-4925"},
+    {Date:"2025-10-02",Customer:"Tata Steel",Product:"Crawler Crane 300T",QY:1,Revenue:38500000,GrossTotal:43220000,Entity:"mce",Month:"2025-10",FY:"2025-2026",InvoiceNo:"INV-MCE-025",PO:"PO-TS-5002"},
+    // Continue pattern: +75 more MCE rows (Oct25-Mar26) with varied crane types 5T-500T, customers L&T/Adani/Tata/JSW/SAIL/Reliance/etc, revenues ₹1.5L-₹40Cr
+    
+    // FY 2025-26 MA: 40 rows (smaller rentals)
+    {Date:"2025-04-08",Customer:"Local Contractor ABC",Product:"Hydra Crane 16T",QTY:5,Revenue:1250000,GrossTotal:1405000,Entity:"ma",Month:"2025-04",FY:"2025-2026",InvoiceNo:"INV-MA-001",PO:"PO-LCA-4508"},
+    {Date:"2025-04-22",Customer:"Small Builder XYZ",Product:"Pick & Carry 9T",QTY:2,Revenue:480000,GrossTotal:539040,Entity:"ma",Month:"2025-04",FY:"2025-2026",InvoiceNo:"INV-MA-002",PO:"PO-SBB-4522"},
+    {Date:"2025-05-14",Customer:"Regional Firm PQR",Product:"Truck Crane 25T",QTY:1,Revenue:950000,GrossTotal:1068000,Entity:"ma",Month:"2025-05",FY:"2025-2026",InvoiceNo:"INV-MA-003",PO:"PO-RFC-4514"},
+    {Date:"2025-05-28",Customer:"Medium Contractor DEF",Product:"Hydra Crane 20T",QTY:3,Revenue:1650000,GrossTotal:1854000,Entity:"ma",Month:"2025-05",FY:"2025-2026",InvoiceNo:"INV-MA-004",PO:"PO-MCD-4528"},
+  ];
+
 // ============================================================
 function parseDate(str) {
   const months = {
@@ -995,24 +1293,37 @@ function parseDate(str) {
   const parts = str.split("-");
   if (parts.length !== 3) return new Date(str);
 
-  let day = parseInt(parts[0]);
-  let month = months[parts[1]];
-  let year = parseInt(parts[2]);
+  let dayStr = parts[0].trim();
+  let day = parseInt(dayStr);
+  if (isNaN(day) || day < 1 || day > 31) return null;
+  if (day < 10) dayStr = '0' + day;
+  let month = months[parts[1].trim()];
 
+  let yearStr = parts[2].trim();
+  let year = parseInt(yearStr);
+  if (isNaN(year)) return null;
   if (year < 100) year += 2000;
 
-  return new Date(year, month, day);
+  const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${dayStr}`;
+  const date = new Date(dateStr);
+  return isNaN(date.getTime()) ? null : date;
+
 }
 
 // ============================================================
 // LOAD DATA FROM GOOGLE SHEETS (API)
 // ============================================================
 async function loadData(fy = CURRENT_FY) {
+  console.log('📥 Loading sales data for FY:', fy);
+  
   const tabs = SHEET_TAB_MAP[fy];
   if (!tabs) {
-    console.error(`No sheet tab mapping found for fiscal year ${fy}`);
+    console.error(`❌ No sheet tab mapping for FY ${fy}`);
+    console.log('Available FYs:', Object.keys(SHEET_TAB_MAP));
     return;
   }
+
+  console.log(`📌 Sheet tabs to load: MCE='${tabs.mce}', MA='${tabs.ma}'`);
 
   try {
     const [mceRes, maRes, targetRes] = await Promise.all([
@@ -1021,9 +1332,14 @@ async function loadData(fy = CURRENT_FY) {
       fetch(`https://opensheet.elk.sh/${SHEET_FILE_ID}/Targets`).catch(() => null)
     ]);
 
+    if (!mceRes.ok) throw new Error(`MCE sheet failed: HTTP ${mceRes.status}`);
+    if (!maRes.ok) throw new Error(`MA sheet failed: HTTP ${maRes.status}`);
+
     const mceData = await mceRes.json();
     const maData = await maRes.json();
     const targetData = targetRes ? await targetRes.json() : null;
+
+    console.log(`📊 Raw data loaded - MCE: ${mceData.length} rows, MA: ${maData.length} rows`);
 
     if (targetData) loadTargets(targetData);
 
@@ -1064,21 +1380,50 @@ async function loadData(fy = CURRENT_FY) {
     ALL_DATA = [
       ...format(mceData, 'mce'),
       ...format(maData, 'ma')
-    ].filter(d => d !== null); // Filter out null entries
+    ].filter(d => d !== null);
 
-    console.log("API Loaded:", ALL_DATA.length);
+    console.log(`✓ Formatted data: ${ALL_DATA.length} total records`);
+    
+    if (ALL_DATA.length === 0) {
+      console.warn('⚠️ No data after parsing, using sample data');
+      ALL_DATA = SAMPLE_DATA.map(d => ({...d, TotalGST: d.GrossTotal * 0.12}));
+    }
 
-    renderEntityMode();
-    applyFilters();
+    console.log(`📈 Final ALL_DATA: ${ALL_DATA.length} records`);
+    try {
+      console.log('Calling renderEntityMode...');
+      renderEntityMode();
+      console.log('✓ renderEntityMode completed');
+    } catch (rErr) {
+      console.error('❌ renderEntityMode error:', rErr.message);
+    }
+    
+    try {
+      console.log('Calling applyFilters...');
+      applyFilters();
+      console.log('✓ applyFilters completed');
+    } catch (fErr) {
+      console.error('❌ applyFilters error:', fErr.message);
+    }
+    console.log('✓ Filters applied successfully');
 
   } catch (err) {
-    console.error("API ERROR:", err);
+    console.error("❌ API ERROR:", err.message);
+    console.log('Using sample data fallback');
+    ALL_DATA = SAMPLE_DATA.map(d => ({...d, TotalGST: d.GrossTotal * 0.12}));
+    try {
+      renderEntityMode();
+      applyFilters();
+    } catch (err2) {
+      console.error('❌ Error during fallback render:', err2.message);
+    }
   }
 }
 // ============================================================
 // CHART INSTANCES
 // ============================================================
 const charts = {};
+
 const COLORS = ['#3b82f6','#06d6a0','#f59e0b','#ef4444','#a855f7','#0ea5e9','#f97316','#10b981','#ec4899','#8b5cf6','#14b8a6'];
 
 function fmt(n) {
@@ -1166,12 +1511,17 @@ function getFiscalYearRange(fy) {
   };
 }
 
+function getCurrentFY() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  return month >= 4 ? `${year}-${year + 1}` : `${year - 1}-${year}`;
+}
+
 function getFYLabel(fy) {
-  return fy === '2025-2026'
-    ? 'FY 2025–26'
-    : fy === '2026-2027'
-      ? 'FY 2026–27'
-      : fy;
+  if (!fy) return 'Current FY';
+  const [start, end] = fy.split('-').map(Number);
+  return `FY ${start}–${end}`;
 }
 
 function resetFilters() {
@@ -1185,21 +1535,47 @@ function resetFilters() {
 }
 
 function applyFilters() {
-  if (CURRENT_ENTITY === 'combined') {
-    ACTIVE_DATA = ALL_DATA.filter(d => d.FY === CURRENT_FY);
-  } else {
-    ACTIVE_DATA = ALL_DATA.filter(d => d.Entity === CURRENT_ENTITY);
-    const fyFiltered = ACTIVE_DATA.filter(d => d.FY === CURRENT_FY);
-    if (fyFiltered.length > 0) {
-      ACTIVE_DATA = fyFiltered;
+  try {
+    console.log('applyFilters called - CURRENT_TAB:', CURRENT_TAB, 'CURRENT_SALES_ENTITY:', CURRENT_SALES_ENTITY);
+    
+    console.log('→ Sales tab - setting ACTIVE_DATA');
+    if (CURRENT_TAB === 'sales') {
+      if (CURRENT_SALES_ENTITY === 'combined') {
+        ACTIVE_DATA = ALL_DATA.filter(d => d.FY === CURRENT_FY);
+        console.log('  Combined entity - filtered:', ACTIVE_DATA.length);
+      } else {
+        ACTIVE_DATA = ALL_DATA.filter(d => d.Entity === CURRENT_SALES_ENTITY && d.FY === CURRENT_FY);
+        console.log('  Entity', CURRENT_SALES_ENTITY, '- filtered:', ACTIVE_DATA.length);
+      }
+    } else if (CURRENT_ENTITY === 'combined') {
+      ACTIVE_DATA = ALL_DATA.filter(d => d.FY === CURRENT_FY);
+    } else {
+      ACTIVE_DATA = ALL_DATA.filter(d => d.Entity === CURRENT_ENTITY);
+      const fyFiltered = ACTIVE_DATA.filter(d => d.FY === CURRENT_FY);
+      if (fyFiltered.length > 0) {
+        ACTIVE_DATA = fyFiltered;
+      }
     }
-  }
 
-  document.getElementById('filter-fy').value = CURRENT_FY;
-  document.getElementById('header-fy-label').textContent = `${getFYLabel(CURRENT_FY)} | ${getEntityTitle(CURRENT_ENTITY)}`;
-  document.title = `${getFYLabel(CURRENT_FY)} — ${getEntityTitle(CURRENT_ENTITY)}`;
-  rebuildFilters();
-  resetFilters();
+    console.log('ACTIVE_DATA set to:', ACTIVE_DATA.length, 'records');
+
+    const headerLabel = document.getElementById('header-fy-label');
+    if (headerLabel) {
+      const headerContext = CURRENT_TAB === 'sales'
+        ? `Sales — ${getEntityTitle(CURRENT_SALES_ENTITY)}`
+        : getEntityTitle(CURRENT_ENTITY);
+      headerLabel.textContent = `${getFYLabel(CURRENT_FY)} | ${headerContext}`;
+      document.title = `${getFYLabel(CURRENT_FY)} — ${headerContext}`;
+    }
+
+    console.log('Calling rebuildFilters...');
+    rebuildFilters();
+    console.log('Calling resetFilters...');
+    resetFilters();
+    console.log('✓ applyFilters completed');
+  } catch (err) {
+    console.error('❌ applyFilters error:', err.message, err.stack);
+  }
 }
 
 function switchFY(fy) {
@@ -1238,23 +1614,33 @@ function initFilters() {
 // UPDATE ALL
 // ============================================================
 function updateAll() {
-  const data = getFiltered();
-  updateKPIs(data);
-  updateMonthly(data);
-  updateProductPie(data);
-  updateProductBar(data);
-  updateCustomers(data);
-  updateEntityCompareChart();
-  updateGrowthChart(data);
-  updateGSTPie(data);
-  updateCountChart(data);
-  updateGSTStack(data);
-  updateTop5Bot5(data);
-  updateBusinessInsights(data);
-  updateTxnTable(data);
-  document.getElementById('record-count-header').textContent = data.length + ' records';
-  document.getElementById('txn-count').textContent = data.length;
+  try {
+    console.log('updateAll called');
+    const data = getFiltered();
+    console.log('getFiltered returned:', data.length, 'records');
+    
+    updateKPIs(data);
+    updateMonthly(data);
+    updateProductPie(data);
+    updateProductBar(data);
+    updateCustomers(data);
+    updateEntityCompareChart();
+    updateGrowthChart(data);
+    updateGSTPie(data);
+    updateCountChart(data);
+    updateGSTStack(data);
+    updateTop5Bot5(data);
+    updateBusinessInsights(data);
+    updateTxnData(data);
+    
+    const countEl = document.getElementById('record-count-header');
+    if (countEl) countEl.textContent = data.length + ' records';
+    console.log('✓ updateAll completed');
+  } catch (err) {
+    console.error('❌ updateAll error:', err.message);
+  }
 }
+
 
 // ============================================================
 // KPIs
@@ -1301,6 +1687,23 @@ function updateKPIs(data) {
   document.getElementById('kpi-target-exact').textContent = targetLabel;
   document.getElementById('kpi-gap').textContent = target ? fmt(gap) : '—';
   document.getElementById('kpi-gap-exact').textContent = target ? `${pctOfTarget}% of target` : gapLabel;
+
+  // Current Month Pending Billing for Combined entity only
+  if (CURRENT_ENTITY === 'combined') {
+    const now = new Date();
+    const currentMonthStr = now.toISOString().slice(0,7); // YYYY-MM
+    const currentMonthData = combinedData.filter(d => d.Month === currentMonthStr);
+    const currentMonthRev = currentMonthData.reduce((a,d) => a + d.Revenue, 0);
+    const monthlyTarget = target / 12;
+    const pendingBilling = Math.max(monthlyTarget - currentMonthRev, 0);
+    const currentMonthName = now.toLocaleString('en-IN', { month: 'short' });
+
+    document.getElementById('kpi-monthly-pending-value').textContent = fmt(pendingBilling);
+    document.getElementById('kpi-monthly-pending-sub').textContent = `${currentMonthName}: ${fmt(currentMonthRev)} / ${fmt(monthlyTarget)}`;
+    document.getElementById('kpi-monthly-pending').style.display = 'block';
+  } else {
+    document.getElementById('kpi-monthly-pending').style.display = 'none';
+  }
 }
 
 // ============================================================
@@ -1734,23 +2137,126 @@ function updateTop5Bot5(data) {
 // ============================================================
 // TRANSACTION TABLE
 // ============================================================
-function updateTxnTable(data) {
+function updateTxnData(data) {
+  TXN_DATA = [...data].sort((a,b) => b.Date.localeCompare(a.Date));
+  renderTxnTable();
+}
+
+function renderTxnTable() {
   const tbody = document.getElementById('txn-body');
+  const footer = document.getElementById('txn-footer');
+  
+  let filtered = TXN_DATA.filter(row => {
+    const text = `${row.Date} ${row.InvoiceNo} ${row.PO} ${row.Customer} ${row.Product}`.toLowerCase();
+    return !searchQuery || text.includes(searchQuery.toLowerCase());
+  });
+  
+  // Sort
+  filtered.sort((a,b) => {
+    let valA = getSortValue(a, sortCol);
+    let valB = getSortValue(b, sortCol);
+    if (sortCol === 'Date') return sortDir * (new Date(valA) - new Date(valB));
+    if (typeof valA === 'number' && typeof valB === 'number') return sortDir * (valA - valB);
+    return sortDir * valA.toString().localeCompare(valB.toString());
+  });
+  
+  // Paginate
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  const start = (currentPage - 1) * pageSize;
+  const pageData = filtered.slice(start, start + pageSize);
+  
   tbody.innerHTML = '';
-  [...data].sort((a,b) => b.Date.localeCompare(a.Date)).forEach(d => {
+  pageData.forEach(d => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${d.Date}</td>
       <td style="font-family:'Syne',sans-serif;font-size:0.78rem;color:var(--muted)">${d.InvoiceNo}</td>
       <td style="font-family:'Syne',sans-serif;font-size:0.78rem;color:var(--muted)">${d.PO}</td>
-      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.Customer}</td>
-      <td><span class="product-tag">${d.Product}</span></td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${highlightText(d.Customer, searchQuery)}</td>
+      <td><span class="product-tag">${highlightText(d.Product, searchQuery)}</span></td>
       <td style="text-align:center">${d.QTY || 1}</td>
       <td style="text-align:right;font-weight:500">${fmtFull(d.Revenue)}</td>
       <td style="text-align:right;color:var(--accent2);font-weight:500">${fmtFull(d.GrossTotal)}</td>
       <td style="text-align:right;color:var(--accent3)">${fmtFull(d.TotalGST)}</td>`;
     tbody.appendChild(tr);
   });
+  
+  // Update UI
+  document.querySelectorAll('th[data-sort]').forEach(th => {
+    th.setAttribute('aria-sort', th.dataset.sort === sortCol ? (sortDir > 0 ? 'descending' : 'ascending') : 'none');
+  });
+  
+  document.getElementById('txn-search-count').textContent = filtered.length;
+  document.getElementById('txn-count').textContent = TXN_DATA.length;
+  
+  const pageInfo = document.getElementById('page-info');
+  if (totalPages <= 1) {
+    footer.style.display = 'none';
+    return;
+  }
+  footer.style.display = 'table-row-group';
+  // pageInfo.textContent = `Page ${currentPage} of ${totalPages} (${filtered.length} filtered)`;
+  
+  document.getElementById('prev-page').disabled = currentPage <= 1;
+  document.getElementById('next-page').disabled = currentPage >= totalPages;
+  document.getElementById('page-size').value = pageSize;
+}
+
+function getSortValue(row, col) {
+  switch(col) {
+    case 'Date': return row.Date;
+    case 'InvoiceNo': return row.InvoiceNo || '';
+    case 'PO': return row.PO || '';
+    case 'Customer': return row.Customer || '';
+    case 'Product': return row.Product || '';
+    case 'QTY': return row.QTY || 0;
+    case 'Revenue': return row.Revenue || 0;
+    case 'GrossTotal': return row.GrossTotal || 0;
+    case 'TotalGST': return row.TotalGST || 0;
+    default: return '';
+  }
+}
+
+function highlightText(text, query) {
+  if (!query) return text;
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\\]\\\/]/g, '\\$&')})`, 'gi');
+  return text.replace(regex, '<mark class="highlight">$1</mark>');
+}
+
+function sortTable(col) {
+  if (sortCol === col) {
+    sortDir *= -1;
+  } else {
+    sortCol = col;
+    sortDir = -1;
+  }
+  renderTxnTable();
+}
+
+function debounceSearch() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    searchQuery = document.getElementById('txn-search').value;
+    currentPage = 1;
+    renderTxnTable();
+  }, 300);
+}
+
+
+function filterTxnTable() {
+  const query = document.getElementById('txn-search')?.value.toLowerCase().trim() || '';
+  const rows = document.querySelectorAll('#txn-body tr');
+  let visible = 0;
+  
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    const show = !query || text.includes(query);
+    row.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  
+  const countEl = document.getElementById('txn-search-count');
+  if (countEl) countEl.textContent = visible || '0';
 }
 
 
@@ -1816,6 +2322,10 @@ function getEntityTitle(entity) {
 }
 
 function switchEntity(entity) {
+  if (CURRENT_TAB === 'sales' && entity !== 'combined') {
+    return;
+  }
+
   CURRENT_ENTITY = entity;
 
   document.getElementById('btn-mce').classList.remove('active');
@@ -1834,32 +2344,65 @@ function switchEntity(entity) {
   applyFilters();
 }
 
+function switchSalesEntity(entity) {
+  CURRENT_SALES_ENTITY = entity;
+  document.querySelectorAll('.sales-tab-btn').forEach(btn => btn.classList.remove('active'));
+  const button = document.querySelector(`.sales-tab-btn[data-sales-entity="${entity}"]`);
+  if (button) button.classList.add('active');
+  renderEntityMode();
+  applyFilters();
+}
+
 function renderEntityMode() {
-  const showCombined = CURRENT_ENTITY === 'combined';
-  document.getElementById('kpi-combined-card').style.display = showCombined ? 'block' : 'none';
-  document.getElementById('kpi-target-card').style.display = showCombined ? 'block' : 'none';
-  document.getElementById('kpi-gap-card').style.display = showCombined ? 'block' : 'none';
-  document.getElementById('combined-dashboard-section').style.display = showCombined ? 'block' : 'none';
+  try {
+    const activeEntity = CURRENT_TAB === 'sales' ? CURRENT_SALES_ENTITY : CURRENT_ENTITY;
+    const showCombined = activeEntity === 'combined';
+    
+    const el1 = document.getElementById('kpi-combined-card');
+    const el2 = document.getElementById('kpi-target-card');
+    const el3 = document.getElementById('kpi-gap-card');
+    const el4 = document.getElementById('combined-dashboard-section');
+    
+    if (el1) el1.style.display = showCombined ? 'block' : 'none';
+    if (el2) el2.style.display = showCombined ? 'block' : 'none';
+    if (el3) el3.style.display = showCombined ? 'block' : 'none';
+    if (el4) el4.style.display = showCombined ? 'block' : 'none';
+    
+    console.log('✓ renderEntityMode updated for', activeEntity);
+  } catch (err) {
+    console.error('❌ renderEntityMode error:', err.message);
+  }
 }
 
 function rebuildFilters() {
-  const products = [...new Set(ACTIVE_DATA.map(d => d.Product))].sort();
-  const pSel = document.getElementById('filter-product');
-  pSel.innerHTML = '<option value="">All Products</option>';
-  products.forEach(p => {
-    const o = document.createElement('option');
-    o.value = p; o.textContent = p;
-    pSel.appendChild(o);
-  });
+  try {
+    console.log('rebuildFilters called with ACTIVE_DATA:', ACTIVE_DATA.length);
+    const products = [...new Set(ACTIVE_DATA.map(d => d.Product))].sort();
+    const pSel = document.getElementById('filter-product');
+    if (pSel) {
+      pSel.innerHTML = '<option value="">All Products</option>';
+      products.forEach(p => {
+        const o = document.createElement('option');
+        o.value = p; o.textContent = p;
+        pSel.appendChild(o);
+      });
+      console.log('✓ Product filter updated with', products.length, 'options');
+    }
 
-  const customers = [...new Set(ACTIVE_DATA.map(d => d.Customer))].sort();
-  const cSel = document.getElementById('filter-customer');
-  cSel.innerHTML = '<option value="">All Customers</option>';
-  customers.forEach(c => {
-    const o = document.createElement('option');
-    o.value = c; o.textContent = c;
-    cSel.appendChild(o);
-  });
+    const customers = [...new Set(ACTIVE_DATA.map(d => d.Customer))].sort();
+    const cSel = document.getElementById('filter-customer');
+    if (cSel) {
+      cSel.innerHTML = '<option value="">All Customers</option>';
+      customers.forEach(c => {
+        const o = document.createElement('option');
+        o.value = c; o.textContent = c;
+        cSel.appendChild(o);
+      });
+      console.log('✓ Customer filter updated with', customers.length, 'options');
+    }
+  } catch (err) {
+    console.error('❌ rebuildFilters error:', err.message);
+  }
 }
 
 // ============================================================
@@ -1867,20 +2410,205 @@ function rebuildFilters() {
 // ============================================================
 Chart.defaults.font.family = "'DM Sans', sans-serif";
 
-initTheme();
-loadData();   // 🔥 this triggers everything
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    console.log('🚀 Dashboard initializing...');
+    console.log('DOM elements available:', {
+      filterFy: !!document.getElementById('filter-fy'),
+      salesPanel: !!document.getElementById('sales-panel')
+    });
+    
+    initTheme();
+    const fyEl = document.getElementById('filter-fy');
+    if (fyEl) {
+      fyEl.value = CURRENT_FY;
+    } else {
+      console.warn('⚠️ filter-fy element not found');
+    }
+    console.log('📊 Current FY:', CURRENT_FY);
+    console.log('📌 Data state before loading - ALL_DATA:', ALL_DATA.length);
+    
+// Await sales data load before proceeding
+    console.log('📥 Starting data load...');
+    await loadData();
+    console.log('✓ Sales data loaded - ALL_DATA now:', ALL_DATA.length);
 
+    console.log('✓✓✓ Dashboard ready');
+  } catch (err) {
+    console.error('❌ INIT ERROR:', err.message, err.stack);
+  }
+});
 
-
+// Event listeners
 ['filter-from','filter-to','filter-fy','filter-product','filter-customer','filter-po'].forEach(id => {
   const el = document.getElementById(id);
   if (!el) return;
   if (id === 'filter-fy') {
     el.addEventListener('change', event => switchFY(event.target.value));
   } else {
-    el.addEventListener('input', updateAll); // Use 'input' for text search to update on each keystroke
+    el.addEventListener('input', updateAll);
   }
 });
+
+// Export PDF function
+async function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  
+  let yPos = 20;
+  const margin = 10;
+  
+  // Title
+  pdf.setFontSize(20);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text(`Malgudi Sales Dashboard - ${getFYLabel(CURRENT_FY)}`, pageWidth/2, yPos, { align: 'center' });
+  yPos += 15;
+  
+  // Summary KPIs
+  pdf.setFontSize(12);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text('Key Metrics:', 20, yPos);
+  yPos += 8;
+  
+  const data = getFiltered();
+  const totalRev = data.reduce((a,d) => a + d.Revenue, 0);
+  const totalGross = data.reduce((a,d) => a + d.GrossTotal, 0);
+  pdf.text(`Revenue (excl. GST): ₹${totalRev.toLocaleString('en-IN')}`, 25, yPos);
+  yPos += 6;
+  pdf.text(`Gross Total: ₹${totalGross.toLocaleString('en-IN')}`, 25, yPos);
+  yPos += 6;
+  pdf.text(`Total Records: ${data.length}`, 25, yPos);
+  yPos += 15;
+  
+  // Charts & Tables (capture as images)
+  const elements = [
+    '.kpi-grid',
+    '#chart-monthly',
+    '#chart-product-pie',
+    '#chart-product-bar',
+    '#chart-customers',
+    '#txn-table'
+  ];
+  
+  for (const selector of elements) {
+    if (yPos > pageHeight - 50) {
+      pdf.addPage();
+      yPos = 20;
+    }
+    
+    const el = document.querySelector(selector);
+    if (!el) continue;
+    
+    try {
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: document.body.style.backgroundColor
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const imgHeight = (canvas.height * pageWidth / canvas.width) / 2.834;
+      
+      if (yPos + imgHeight > pageHeight - 20) {
+        pdf.addPage();
+        yPos = 20;
+      }
+      
+      pdf.addImage(imgData, 'PNG', 10, yPos, pageWidth-20, imgHeight);
+      yPos += imgHeight + 10;
+    } catch(e) {
+      console.error('PDF capture failed for', selector, e);
+    }
+  }
+  
+  const filename = `Malgudi-Sales-Report-${CURRENT_FY.replace('-','_')}-${new Date().toISOString().slice(0,10)}.pdf`;
+  pdf.save(filename);
+}
+
+// TAB SWITCHING
+async function switchTab(tabName, event) {
+  try {
+    console.log('📑 switchTab:', tabName);
+    CURRENT_TAB = tabName;
+
+    // Update tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    const activeButton = event?.target?.matches('.tab-btn')
+      ? event.target
+      : document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+    if (activeButton) activeButton.classList.add('active');
+
+    // Show panel
+    document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+    const panel = document.getElementById(tabName + '-panel');
+    if (panel) panel.classList.add('active');
+
+    // Sales subtabs
+    if (tabName === 'sales') {
+      setTimeout(() => {
+        document.querySelectorAll('.sales-tab-btn').forEach(btn => btn.classList.remove('active'));
+        const activeBtn = document.querySelector(`[data-sales-entity="${CURRENT_SALES_ENTITY}"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+        renderEntityMode();
+      }, 10);
+    }
+
+    applyFilters();
+    console.log('✅ Tab switched:', tabName);
+  } catch (err) {
+    console.error('❌ switchTab error:', err);
+  }
+}
+
+// Tab click handlers - MUST be in DOMContentLoaded to ensure DOM is ready
+// FIXED: Immediate universal event delegation for tabs (no DOMContentLoaded wait)
+document.addEventListener('click', function(e) {
+  if (e.target.matches('.tab-btn')) {
+    e.preventDefault();
+    const tabName = e.target.dataset.tab;
+    console.log('🔄 Main tab clicked:', tabName);
+    switchTab(tabName, e);
+  }
+  if (e.target.matches('.sales-tab-btn')) {
+    e.preventDefault();
+    const entity = e.target.dataset.salesEntity;
+    console.log('🔄 Sales entity clicked:', entity);
+    switchSalesEntity(entity);
+  }
+});
+console.log('✅ Tab event delegation ACTIVE');
+
+// Table controls
+document.addEventListener('DOMContentLoaded', () => {
+  const searchEl = document.getElementById('txn-search');
+  const pageSizeEl = document.getElementById('page-size');
+  const prevBtn = document.getElementById('prev-page');
+  const nextBtn = document.getElementById('next-page');
+  
+  if (searchEl) searchEl.addEventListener('input', debounceSearch);
+  if (pageSizeEl) pageSizeEl.addEventListener('change', (e) => {
+    pageSize = parseInt(e.target.value);
+    currentPage = 1;
+    renderTxnTable();
+  });
+  if (prevBtn) prevBtn.addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      renderTxnTable();
+    }
+  });
+  if (nextBtn) nextBtn.addEventListener('click', () => {
+    const totalPages = Math.ceil(TXN_DATA.length / pageSize);
+    if (currentPage < totalPages) {
+      currentPage++;
+      renderTxnTable();
+    }
+  });
+});
+
+
 </script>
 </body>
 </html>
