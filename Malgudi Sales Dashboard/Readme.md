@@ -1,5 +1,14 @@
 # MCE/MA Sales Dashboard 🏗️🔧
 
+## 📝 Recent Updates (BlackboxAI Session)
+- **Added TODO workflow files**:
+  - `EXPORT-TODO.md` & `EXPORT-IMPL-TODO.md`: Export functionality planning/implementation
+  - `IMPLEMENTATION-TODO.md`: Core implementation roadmap
+  - `TODO-EDIT.md`: Code editing tasks
+  - `TODO-FIX-DATA.md`: Data fixes & validation (marked ✅ complete)
+  - Root `TODO.md`: Progress tracking
+- **Enhanced** `MCE_MA_Sales_Dashboard.html` with optimizations
+- **View status**: [Malgudi Sales Dashboard/TODO.md](Malgudi Sales Dashboard/TODO.md)
 
 **Live, interactive sales analytics dashboard** for **MCE (Malgudi Cranes & Equipments)** and **MA (Malgudi Associates)**. Fetches real-time data from Google Sheets, renders 10+ **Chart.js** charts, **KPI cards**, filterable tables. **Zero setup** - opens in any browser.
 
