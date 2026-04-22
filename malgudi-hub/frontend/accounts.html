@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accounts — Malgudi BI Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<script src="shared/nav.js"></script><script>initTheme();</script>
+<header class="header">
+  <div class="hdr-brand"><div class="hdr-logo">🏦</div><div><div class="hdr-name">Accounts</div><div class="hdr-sub">Revenue, Collections & Receivables</div></div></div>
+  <nav class="hdr-nav" id="mainNav"></nav>
+  <div class="hdr-right">
+    <div class="refresh-bar"><span class="pulse"></span><span id="cdown">30</span>s</div>
+    <button class="btn-sm" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+    <div class="user-pill" onclick="doLogout()"><div class="user-av" id="userAv">A</div><span id="userNm">admin</span></div>
+  </div>
+</header>
+<main class="main">
+<div class="kpi-grid">
+  <div class="kpi-card" style="--kc:#10b981"><div class="kpi-ico">💰</div><div class="kpi-lbl">Revenue FY25-26</div><div class="kpi-val">₹4.2 Cr</div><div class="kpi-sub">Billed</div></div>
+  <div class="kpi-card" style="--kc:#3b82f6"><div class="kpi-ico">✅</div><div class="kpi-lbl">Collected</div><div class="kpi-val">₹3.1 Cr</div><div class="kpi-sub">Received</div></div>
+  <div class="kpi-card" style="--kc:#f59e0b"><div class="kpi-ico">🕐</div><div class="kpi-lbl">Receivables</div><div class="kpi-val">₹1.1 Cr</div><div class="kpi-sub">Outstanding</div></div>
+  <div class="kpi-card" style="--kc:#ef4444"><div class="kpi-ico">⚠️</div><div class="kpi-lbl">Overdue >90d</div><div class="kpi-val">₹28L</div><div class="kpi-sub">Critical</div></div>
+  <div class="kpi-card" style="--kc:#a855f7"><div class="kpi-ico">📊</div><div class="kpi-lbl">Collection %</div><div class="kpi-val">73.8%</div><div class="kpi-sub">Of billed</div></div>
+  <div class="kpi-card" style="--kc:#06b6d4"><div class="kpi-ico">🧾</div><div class="kpi-lbl">Invoices Raised</div><div class="kpi-val">62</div><div class="kpi-sub">FY 2025–26</div></div>
+</div>
+<div class="row row-2">
+  <div class="card"><div class="card-hdr"><div class="card-title">Monthly Revenue vs Collections</div><div class="card-sub">Billed vs received trend</div></div><canvas id="cAccRev" height="240"></canvas></div>
+  <div class="card"><div class="card-hdr"><div class="card-title">Receivables Ageing</div><div class="card-sub">Outstanding by days</div></div><canvas id="cAccAgeing" height="240"></canvas></div>
+</div>
+<div class="row row-3">
+  <div class="card"><div class="card-hdr"><div class="card-title">Revenue by Client</div><div class="card-sub">Top 6 clients</div></div><canvas id="cAccClient" height="220"></canvas></div>
+  <div class="card"><div class="card-hdr"><div class="card-title">Payment Modes</div><div class="card-sub">How clients pay</div></div><canvas id="cAccMode" height="220"></canvas></div>
+  <div class="card"><div class="card-hdr"><div class="card-title">Quarterly Trend</div><div class="card-sub">Q-on-Q performance</div></div><canvas id="cAccQtr" height="220"></canvas></div>
+</div>
+<div class="tbl-card">
+  <div class="tbl-top"><div style="font-weight:700;font-size:.88rem">Pending Receivables</div></div>
+  <div class="tbl-wrap">
+    <table><thead><tr><th>Invoice #</th><th>Client</th><th>Amount</th><th>Invoice Date</th><th>Due Date</th><th>Days Overdue</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td style="font-family:var(--mono);color:var(--txt3)">INV-0142</td><td><b>Torrent Power</b></td><td style="font-family:var(--mono);font-weight:700">₹42.5L</td><td>2025-05-10</td><td>2025-07-09</td><td style="color:var(--red);font-weight:700;font-family:var(--mono)">52 days</td><td><span class="badge b-high">⚠️ Overdue</span></td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--txt3)">INV-0148</td><td><b>L&T</b></td><td style="font-family:var(--mono);font-weight:700">₹19.0L</td><td>2025-06-15</td><td>2025-08-14</td><td style="color:var(--amber);font-weight:700;font-family:var(--mono)">16 days</td><td><span class="badge b-quot">⏳ Partial</span></td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--txt3)">INV-0151</td><td><b>JSW Steel</b></td><td style="font-family:var(--mono);font-weight:700">₹29.0L</td><td>2025-07-01</td><td>2025-08-30</td><td style="color:var(--green);font-family:var(--mono)">0 days</td><td><span class="badge b-inq">🔵 Upcoming</span></td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--txt3)">INV-0153</td><td><b>NTPC</b></td><td style="font-family:var(--mono);font-weight:700">₹24.0L</td><td>2025-07-20</td><td>2025-09-18</td><td style="color:var(--green);font-family:var(--mono)">0 days</td><td><span class="badge b-inq">🔵 Upcoming</span></td></tr>
+    </tbody></table>
+  </div>
+</div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+buildNav('accounts');
+const O = getChartOpts();
+const months=['Apr','May','Jun','Jul','Aug'];
+mkChart('cAccRev',{type:'bar',data:{labels:months,datasets:[{label:'Revenue (₹L)',data:[62,78,95,88,112],backgroundColor:'rgba(59,130,246,.7)',borderRadius:6},{label:'Collected (₹L)',data:[48,65,78,72,88],backgroundColor:'rgba(16,185,129,.7)',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:O.tt,legend:{labels:{boxWidth:8,padding:10,font:{size:11}}}},scales:{x:{grid:{color:O.grid}},y:{grid:{color:O.grid},beginAtZero:true}}}});
+mkChart('cAccAgeing',{type:'bar',data:{labels:['0–30 days','31–60 days','61–90 days','>90 days'],datasets:[{data:[45,28,17,10],backgroundColor:['#10b981','#f59e0b','#f97316','#ef4444'],borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...O.tt,callbacks:{label:c=>' ₹'+c.raw+'L'}}},scales:{x:{grid:{color:O.grid}},y:{grid:{color:O.grid},beginAtZero:true,ticks:{callback:v=>'₹'+v+'L'}}}}});
+mkChart('cAccClient',{type:'bar',data:{labels:['Torrent','L&T','JSW','NTPC','Toyota','Kalyani'],datasets:[{data:[85,38,29,48,58,18.5],backgroundColor:MALGUDI.COLORS,borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...O.tt,callbacks:{label:c=>' ₹'+c.raw+'L'}}},scales:{x:{grid:{color:O.grid},ticks:{callback:v=>'₹'+v+'L'}},y:{grid:{color:O.grid}}}}});
+mkChart('cAccMode',{type:'doughnut',data:{labels:['NEFT/RTGS','Cheque','LC','Advance'],datasets:[{data:[52,28,12,8],backgroundColor:['#3b82f6','#10b981','#a855f7','#f59e0b'],borderWidth:2,borderColor:'transparent',hoverOffset:6}]},options:{cutout:'56%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:5,font:{size:10}}},tooltip:O.tt}}});
+mkChart('cAccQtr',{type:'line',data:{labels:['Q1 FY25','Q2 FY25','Q3 FY25','Q4 FY25','Q1 FY26'],datasets:[{label:'Revenue',data:[72,95,118,142,107],borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.1)',fill:true,tension:.4,pointRadius:5,borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...O.tt,callbacks:{label:c=>' ₹'+c.raw+'L'}}},scales:{x:{grid:{color:O.grid}},y:{grid:{color:O.grid},ticks:{callback:v=>'₹'+v+'L'}}}}});
+startCountdown(30, c => setV('cdown',c), ()=>{});
+</script>
+</body></html>

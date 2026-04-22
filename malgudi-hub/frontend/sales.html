@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales — Malgudi BI Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<script src="shared/nav.js"></script><script>initTheme();</script>
+<header class="header">
+  <div class="hdr-brand"><div class="hdr-logo">💹</div><div><div class="hdr-name">Sales Dashboard</div><div class="hdr-sub">MCE & Malgudi Associates</div></div></div>
+  <nav class="hdr-nav" id="mainNav"></nav>
+  <div class="hdr-right">
+    <div class="refresh-bar"><span class="pulse"></span><span id="cdown">30</span>s</div>
+    <button class="btn-sm" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+    <div class="user-pill" onclick="doLogout()"><div class="user-av" id="userAv">A</div><span id="userNm">admin</span></div>
+  </div>
+</header>
+<main class="main">
+<div class="kpi-grid">
+  <div class="kpi-card" style="--kc:#10b981"><div class="kpi-ico">💰</div><div class="kpi-lbl">Total Revenue</div><div class="kpi-val" id="vTRev">₹4.2 Cr</div><div class="kpi-sub">FY 2025–26</div></div>
+  <div class="kpi-card" style="--kc:#3b82f6"><div class="kpi-ico">🎯</div><div class="kpi-lbl">Target</div><div class="kpi-val">₹6.0 Cr</div><div class="kpi-sub">Annual target</div></div>
+  <div class="kpi-card" style="--kc:#f59e0b"><div class="kpi-ico">📊</div><div class="kpi-lbl">Achievement</div><div class="kpi-val">70%</div><div class="kpi-sub">vs Target</div></div>
+  <div class="kpi-card" style="--kc:#a855f7"><div class="kpi-ico">📦</div><div class="kpi-lbl">Orders</div><div class="kpi-val" id="vOrders">—</div><div class="kpi-sub">Confirmed</div></div>
+  <div class="kpi-card" style="--kc:#06b6d4"><div class="kpi-ico">💳</div><div class="kpi-lbl">Avg Order</div><div class="kpi-val">₹24.7L</div><div class="kpi-sub">Per order</div></div>
+  <div class="kpi-card" style="--kc:#ef4444"><div class="kpi-ico">🏦</div><div class="kpi-lbl">Receivables</div><div class="kpi-val">₹1.1 Cr</div><div class="kpi-sub">Outstanding</div></div>
+  <div class="kpi-card span2" style="--kc:#f97316"><div class="kpi-ico">📈</div><div class="kpi-lbl">Q4 Revenue</div><div class="kpi-val">₹1.4 Cr</div><div class="kpi-sub">Best quarter</div></div>
+</div>
+<div class="row row-2">
+  <div class="card"><div class="card-hdr"><div class="card-title">Monthly Revenue — MCE</div><div class="card-sub">Order booking vs collections</div></div><canvas id="cSalesRev" height="240"></canvas></div>
+  <div class="card"><div class="card-hdr"><div class="card-title">Revenue by Salesperson</div><div class="card-sub">Won order value</div></div><canvas id="cSalesPerson" height="240"></canvas></div>
+</div>
+<div class="row row-3">
+  <div class="card"><div class="card-hdr"><div class="card-title">Product Mix</div><div class="card-sub">Revenue by crane type</div></div><canvas id="cSalesProd" height="220"></canvas></div>
+  <div class="card"><div class="card-hdr"><div class="card-title">State-wise Revenue</div><div class="card-sub">Top performing regions</div></div><canvas id="cSalesState" height="220"></canvas></div>
+  <div class="card"><div class="card-hdr"><div class="card-title">Order Stage</div><div class="card-sub">Pipeline health</div></div><canvas id="cSalesStage" height="220"></canvas></div>
+</div>
+<div style="text-align:center;padding:12px;color:var(--txt3);font-size:.75rem;font-family:var(--mono)">🔗 Connect to backend API or Google Sheets to show live sales data · <a href="shared/nav.js" style="color:var(--blue)">Configure</a></div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+buildNav('sales');
+const O = getChartOpts();
+const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'];
+mkChart('cSalesRev',{type:'bar',data:{labels:months,datasets:[
+  {label:'Bookings',data:[28,42,55,38,72,61,48,85,67],backgroundColor:'rgba(16,185,129,.7)',borderRadius:6},
+  {label:'Collections',data:[22,35,48,30,65,54,40,72,58],backgroundColor:'rgba(59,130,246,.5)',borderRadius:6}
+]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:O.tt,legend:{labels:{boxWidth:8,padding:10,font:{size:11}}}},scales:{x:{grid:{color:O.grid}},y:{grid:{color:O.grid},beginAtZero:true,ticks:{callback:v=>v+'L'}}}}});
+mkChart('cSalesPerson',{type:'bar',data:{labels:['Amit Shah','Rajesh Nair','Priya Sharma'],datasets:[{label:'Revenue (₹L)',data:[185,142,95],backgroundColor:['#3b82f6','#10b981','#a855f7'],borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:O.tt},scales:{x:{grid:{color:O.grid}},y:{grid:{color:O.grid},beginAtZero:true}}}});
+mkChart('cSalesProd',{type:'doughnut',data:{labels:['EOT Crane','Gantry','Jib Crane','Hoist','LCS'],datasets:[{data:[62,18,8,7,5],backgroundColor:MALGUDI.COLORS,borderWidth:2,borderColor:'transparent',hoverOffset:6}]},options:{cutout:'56%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:5,font:{size:10}}},tooltip:O.tt}}});
+mkChart('cSalesState',{type:'bar',data:{labels:['Maharashtra','Gujarat','Karnataka','Telangana','UP','Haryana'],datasets:[{label:'₹L',data:[142,98,72,58,48,32],backgroundColor:MALGUDI.COLORS,borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:O.tt},scales:{x:{grid:{color:O.grid},beginAtZero:true},y:{grid:{color:O.grid}}}}});
+mkChart('cSalesStage',{type:'doughnut',data:{labels:['Won','Quotation Sent','Inquiry','Lost'],datasets:[{data:[17,4,3,3],backgroundColor:['#10b981','#f59e0b','#6366f1','#ef4444'],borderWidth:2,borderColor:'transparent',hoverOffset:6}]},options:{cutout:'56%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:5,font:{size:10}}},tooltip:O.tt}}});
+startCountdown(30, c => setV('cdown',c), ()=>{});
+</script>
+</body></html>

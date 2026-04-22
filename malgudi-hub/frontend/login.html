@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — Malgudi BI Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#3b82f6;--purple:#a855f7;--green:#10b981;--red:#ef4444;--txt:#f1f5f9;--txt2:#94a3b8;--txt3:#475569;--s1:#0d1220;--s2:#111827;--bdr2:rgba(255,255,255,.12);--font:'Outfit',sans-serif;--mono:'JetBrains Mono',monospace;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font);background:#070b12;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+
+/* BG ANIMATION */
+.bg-orbs{position:fixed;inset:0;z-index:0;overflow:hidden;}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);animation:orb-float 8s ease-in-out infinite;}
+.orb1{width:600px;height:600px;background:rgba(59,130,246,.12);top:-200px;left:-100px;animation-delay:0s;}
+.orb2{width:500px;height:500px;background:rgba(99,102,241,.1);bottom:-150px;right:-100px;animation-delay:3s;}
+.orb3{width:400px;height:400px;background:rgba(16,185,129,.08);top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:1.5s;}
+@keyframes orb-float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-30px) scale(1.05)}}
+.orb3{animation-name:orb-float3;}
+@keyframes orb-float3{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-55%) scale(1.08)}}
+
+/* GRID LINES */
+.grid-bg{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(59,130,246,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.03) 1px,transparent 1px);background-size:40px 40px;}
+
+.login-wrap{position:relative;z-index:10;display:flex;gap:0;border-radius:20px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.7);width:860px;max-width:95vw;}
+
+/* LEFT PANEL */
+.login-left{flex:1;background:linear-gradient(145deg,#0d1220 0%,#111827 100%);border:1px solid rgba(255,255,255,.08);padding:48px 40px;display:flex;flex-direction:column;justify-content:space-between;}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:40px;}
+.brand-mark{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 8px 24px rgba(59,130,246,.3);}
+.brand-name{font-weight:900;font-size:1.1rem;color:#fff;line-height:1.2;}
+.brand-tag{font-size:.68rem;color:var(--txt3);font-family:var(--mono);}
+.login-tagline{font-size:1.6rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:16px;}
+.login-tagline span{background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.login-desc{color:var(--txt2);font-size:.88rem;line-height:1.6;margin-bottom:32px;}
+
+.feature-list{display:flex;flex-direction:column;gap:12px;}
+.feature-item{display:flex;align-items:center;gap:10px;font-size:.82rem;color:var(--txt2);}
+.feature-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:32px;}
+.stat-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px;text-align:center;}
+.stat-num{font-size:1.3rem;font-weight:900;font-family:var(--mono);color:#fff;}
+.stat-lbl{font-size:.65rem;color:var(--txt3);margin-top:2px;}
+
+/* RIGHT PANEL */
+.login-right{width:380px;background:#0a0f1a;border:1px solid rgba(255,255,255,.08);border-left:none;padding:48px 36px;display:flex;flex-direction:column;justify-content:center;}
+.login-right h2{font-size:1.5rem;font-weight:800;color:#fff;margin-bottom:6px;}
+.login-right p{color:var(--txt2);font-size:.85rem;margin-bottom:32px;}
+
+.form-group{margin-bottom:16px;}
+.form-group label{display:block;font-size:.7rem;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.form-group input{width:100%;padding:12px 14px;background:rgba(255,255,255,.05);border:1px solid var(--bdr2);border-radius:9px;color:#fff;font-family:var(--font);font-size:.9rem;transition:border-color .2s;}
+.form-group input:focus{outline:none;border-color:var(--blue);background:rgba(59,130,246,.05);}
+.form-group input::placeholder{color:var(--txt3);}
+
+.login-err{color:var(--red);font-size:.8rem;padding:9px 12px;background:rgba(239,68,68,.1);border-radius:7px;border-left:3px solid var(--red);margin-bottom:12px;display:none;}
+.btn-login{width:100%;padding:13px;background:linear-gradient(135deg,var(--blue),#4f46e5);color:#fff;border:none;border-radius:9px;font-family:var(--font);font-weight:700;font-size:.95rem;transition:all .2s;box-shadow:0 4px 20px rgba(59,130,246,.3);}
+.btn-login:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(59,130,246,.4);}
+.login-hint{text-align:center;color:var(--txt3);font-size:.72rem;margin-top:20px;font-family:var(--mono);}
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--txt3);font-size:.75rem;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08);}
+
+/* ANIM */
+.login-wrap{animation:slideIn .5s cubic-bezier(.34,1.56,.64,1);}
+@keyframes slideIn{from{opacity:0;transform:translateY(40px) scale(.97)}to{opacity:1;transform:none}}
+
+@media(max-width:768px){.login-left{display:none;}.login-wrap{width:100%;max-width:420px;}.login-right{width:100%;border-left:1px solid rgba(255,255,255,.08);border-radius:20px;padding:36px 28px;}}
+</style>
+</head>
+<body>
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+<div class="grid-bg"></div>
+
+<div class="login-wrap">
+  <!-- LEFT -->
+  <div class="login-left">
+    <div>
+      <div class="brand">
+        <div class="brand-mark">🏗️</div>
+        <div>
+          <div class="brand-name">Malgudi Cranes</div>
+          <div class="brand-tag">BUSINESS INTELLIGENCE HUB</div>
+        </div>
+      </div>
+      <div class="login-tagline">Your complete<br><span>business intelligence</span><br>in one place</div>
+      <div class="login-desc">Track leads, monitor sales, manage projects, services, design and accounts — all from a single unified dashboard.</div>
+      <div class="feature-list">
+        <div class="feature-item"><div class="feature-dot" style="background:#3b82f6"></div>📋 Lead Tracker with funnel & conversion analytics</div>
+        <div class="feature-item"><div class="feature-dot" style="background:#10b981"></div>💹 Sales dashboard — MCE & Malgudi Associates</div>
+        <div class="feature-item"><div class="feature-dot" style="background:#f59e0b"></div>🔧 Project pipeline tracking & delivery status</div>
+        <div class="feature-item"><div class="feature-dot" style="background:#06b6d4"></div>⚙️ Service ticket management & AMC tracking</div>
+        <div class="feature-item"><div class="feature-dot" style="background:#a855f7"></div>📐 Design job allocation & TAT monitoring</div>
+        <div class="feature-item"><div class="feature-dot" style="background:#f43f5e"></div>🏦 Accounts — revenue, collections & receivables</div>
+        <div class="feature-item"><div class="feature-dot" style="background:#84cc16"></div>📊 Live data via Google Sheets integration</div>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-num">6</div><div class="stat-lbl">Dashboards</div></div>
+      <div class="stat-box"><div class="stat-num">40+</div><div class="stat-lbl">Live Charts</div></div>
+      <div class="stat-box"><div class="stat-num">∞</div><div class="stat-lbl">Data Points</div></div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="login-right">
+    <h2>Welcome back 👋</h2>
+    <p>Sign in to your Malgudi BI Hub</p>
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="lu" placeholder="Enter username" value="admin" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="lp" placeholder="••••••••" value="admin123" autocomplete="current-password">
+    </div>
+    <div class="login-err" id="lerr">❌ Invalid username or password</div>
+    <button class="btn-login" onclick="submitLogin()">Sign In →</button>
+    <div class="divider">demo credentials</div>
+    <div class="login-hint">admin / admin123 &nbsp;·&nbsp; manager / manager456</div>
+  </div>
+</div>
+
+<script src="shared/nav.js"></script>
+<script>
+const USERS = { admin:'admin123', manager:'manager456', accounts:'accounts789' };
+function submitLogin() {
+  const u = document.getElementById('lu').value.trim();
+  const p = document.getElementById('lp').value.trim();
+  if (USERS[u] && USERS[u] === p) {
+    sessionStorage.setItem('mg_user', u);
+    window.location.href = 'index.html';
+  } else {
+    const e = document.getElementById('lerr');
+    e.style.display = 'block';
+    document.getElementById('lp').select();
+  }
+}
+document.getElementById('lp').addEventListener('keydown', e => { if (e.key === 'Enter') submitLogin(); });
+document.getElementById('lu').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('lp').focus(); });
+// Redirect if already logged in
+if (sessionStorage.getItem('mg_user')) window.location.href = 'index.html';
+</script>
+</body>
+</html>

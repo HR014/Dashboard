@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home — Malgudi Cranes & Equipments Pvt Ltd</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/style.css">
+<style>
+/* ── HERO SLIDER ── */
+.hero{position:relative;height:500px;overflow:hidden;border-radius:16px;margin-bottom:20px;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.hero-slides{display:flex;width:100%;height:100%;transition:transform .8s cubic-bezier(.4,0,.2,1);}
+.hero-slide{min-width:100%;height:100%;position:relative;display:flex;align-items:flex-end;padding:48px;}
+.slide-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform 10s ease;}
+.hero:hover .slide-bg{transform:scale(1.04);}
+
+/* Crane imagery via SVG patterns + gradient backgrounds */
+.slide-bg-1{background:linear-gradient(135deg,#0d1f3a 0%,#1a3a5c 40%,#0f2640 100%);}
+.slide-bg-2{background:linear-gradient(135deg,#0d2020 0%,#0f3a2a 40%,#0a2018 100%);}
+.slide-bg-3{background:linear-gradient(135deg,#1a1020 0%,#2d1a4a 40%,#1a0d30 100%);}
+.slide-bg-4{background:linear-gradient(135deg,#1f1500 0%,#3a2a00 40%,#251800 100%);}
+
+/* Realistic crane silhouette SVG backgrounds */
+.slide-crane-art{position:absolute;right:0;top:0;bottom:0;width:55%;opacity:.18;overflow:hidden;}
+.slide-crane-art svg{width:100%;height:100%;}
+
+.slide-overlay{position:absolute;inset:0;background:linear-gradient(to right,rgba(7,11,18,.92) 0%,rgba(7,11,18,.65) 55%,rgba(7,11,18,.15) 100%);}
+.slide-content{position:relative;z-index:2;max-width:580px;}
+.slide-tag{display:inline-flex;align-items:center;gap:6px;border:1px solid;padding:5px 14px;border-radius:20px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;}
+.slide-title{font-size:2.1rem;font-weight:900;color:#fff;line-height:1.2;margin-bottom:12px;text-shadow:0 2px 16px rgba(0,0,0,.6);}
+.slide-title span{display:block;}
+.slide-desc{color:rgba(255,255,255,.78);font-size:.88rem;line-height:1.65;margin-bottom:22px;max-width:440px;}
+.slide-btns{display:flex;gap:10px;flex-wrap:wrap;}
+.btn-pri{padding:11px 24px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-family:var(--font);font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.btn-pri:hover{background:#2563eb;transform:translateY(-2px);box-shadow:0 8px 24px rgba(59,130,246,.4);}
+.btn-sec{padding:11px 24px;background:rgba(255,255,255,.1);backdrop-filter:blur(8px);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;font-family:var(--font);font-weight:600;font-size:.85rem;cursor:pointer;transition:all .2s;text-decoration:none;}
+.btn-sec:hover{background:rgba(255,255,255,.2);}
+
+/* Slide indicators & arrows */
+.slide-dots{position:absolute;bottom:22px;left:48px;z-index:10;display:flex;gap:6px;}
+.sdot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.35);cursor:pointer;transition:all .3s;}
+.sdot.active{background:#fff;width:28px;border-radius:4px;}
+.slide-arrows{position:absolute;bottom:18px;right:20px;z-index:10;display:flex;gap:8px;}
+.sarrow{width:38px;height:38px;border-radius:9px;background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;}
+.sarrow:hover{background:rgba(255,255,255,.25);}
+.slide-counter{position:absolute;top:20px;right:20px;z-index:10;background:rgba(0,0,0,.4);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:.72rem;font-family:var(--mono);padding:5px 10px;border-radius:6px;}
+/* Slide progress bar */
+.slide-progress{position:absolute;bottom:0;left:0;height:3px;background:var(--blue);border-radius:0;transition:width linear;z-index:10;}
+
+/* ── DATA SOURCE STATUS BAR ── */
+.datasrc-bar{display:flex;align-items:center;gap:8px;padding:9px 16px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;margin-bottom:16px;font-size:.78rem;}
+.gsync-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.gsync-dot.live{background:var(--green);animation:pulse 2s infinite;}
+.gsync-dot.offline{background:var(--amber);}
+#syncStatus{display:flex;align-items:center;gap:6px;}
+.datasrc-info{margin-left:auto;font-family:var(--mono);font-size:.7rem;color:var(--txt3);}
+
+/* ── KPI STRIP ── */
+.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
+.strip-card{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r);padding:16px 20px;display:flex;align-items:center;gap:14px;transition:all .2s;text-decoration:none;color:inherit;}
+.strip-card:hover{border-color:var(--bdr2);transform:translateY(-2px);box-shadow:var(--shadow);}
+.strip-ico{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.strip-val{font-size:1.45rem;font-weight:900;font-family:var(--mono);color:var(--txt);}
+.strip-lbl{font-size:.65rem;color:var(--txt3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:1px;}
+.strip-delta{font-size:.72rem;margin-top:3px;}
+.delta-up{color:var(--green);}
+.delta-dn{color:var(--red);}
+
+/* ── MAIN GRID ── */
+.home-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;}
+.home-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;}
+
+/* ── QUICK ACCESS ── */
+.quick-access{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.qa-card{display:flex;align-items:center;gap:11px;padding:13px 15px;background:var(--s2);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;transition:all .2s;text-decoration:none;color:inherit;}
+.qa-card:hover{border-color:var(--bdr2);background:var(--s3);transform:translateX(3px);}
+.qa-ico{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.qa-name{font-weight:700;font-size:.83rem;color:var(--txt);}
+.qa-desc{font-size:.68rem;color:var(--txt3);margin-top:1px;}
+.qa-arrow{margin-left:auto;color:var(--txt3);font-size:.9rem;transition:transform .2s;}
+.qa-card:hover .qa-arrow{transform:translateX(4px);}
+
+/* ── COMPANY CARD ── */
+.company-card{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r);padding:24px;position:relative;overflow:hidden;}
+.company-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--purple),var(--teal));}
+.company-mark{width:54px;height:54px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 4px 16px rgba(59,130,246,.25);flex-shrink:0;}
+.company-fullname{font-size:1.02rem;font-weight:800;color:var(--txt);line-height:1.3;}
+.company-reg{font-size:.68rem;color:var(--txt3);font-family:var(--mono);margin-top:3px;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;}
+.info-item{background:var(--s2);border-radius:8px;padding:9px 11px;}
+.info-key{font-size:.62rem;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+.info-val{font-size:.8rem;font-weight:600;color:var(--txt);}
+
+/* ── ACTIVITY ── */
+.activity-item{display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-bottom:1px solid var(--bdr);}
+.activity-item:last-child{border-bottom:none;}
+.act-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.act-text{font-size:.78rem;color:var(--txt);font-weight:500;}
+.act-sub{font-size:.7rem;color:var(--txt3);margin-top:2px;}
+.act-time{font-size:.67rem;color:var(--txt3);font-family:var(--mono);white-space:nowrap;margin-left:auto;}
+
+/* ── MINI CHART ── */
+.mini-chart-wrap{height:190px;position:relative;}
+
+/* ── ANIM ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.anim{animation:fadeUp .4s ease both;}
+.d1{animation-delay:.05s}.d2{animation-delay:.1s}.d3{animation-delay:.15s}.d4{animation-delay:.2s}.d5{animation-delay:.25s}
+
+@media(max-width:1200px){
+  .kpi-strip{grid-template-columns:repeat(3,1fr);}
+  .home-grid{grid-template-columns:1fr;}
+  .home-grid-3{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:768px){
+  .kpi-strip{grid-template-columns:repeat(2,1fr);}
+  .home-grid-3{grid-template-columns:1fr;}
+  .quick-access{grid-template-columns:1fr;}
+  .hero{height:380px;}
+  .slide-title{font-size:1.5rem;}
+  .slide-content{max-width:100%;}
+}
+</style>
+</head>
+<body>
+<script src="shared/nav.js"></script>
+<script>initTheme();</script>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="hdr-brand">
+    <div class="hdr-logo">🏗️</div>
+    <div>
+      <div class="hdr-name">Malgudi Cranes & Equipments Pvt Ltd</div>
+      <div class="hdr-sub">Business Intelligence Hub</div>
+    </div>
+  </div>
+  <nav class="hdr-nav" id="mainNav"></nav>
+  <div class="hdr-right">
+    <div class="refresh-bar"><span class="pulse"></span> Live · <span id="cdown">30</span>s</div>
+    <button class="btn-sm" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+    <div class="user-pill" onclick="doLogout()">
+      <div class="user-av" id="userAv">A</div>
+      <span id="userNm">admin</span>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- DATA SOURCE BAR -->
+  <div class="datasrc-bar">
+    <span id="syncStatus"><span class="gsync-dot offline"></span> Checking data source…</span>
+    <span style="color:var(--txt3);font-size:.78rem;margin-left:8px;">All dashboards sync automatically</span>
+    <span class="datasrc-info" id="lastSync">—</span>
+    <a href="shared/nav.js" style="color:var(--blue);font-size:.72rem;margin-left:16px;" onclick="event.preventDefault();alert('Edit GSHEET_URL in shared/nav.js and set USE_GSHEETS: true')">⚙️ Configure Google Sheets</a>
+  </div>
+
+  <!-- HERO SLIDER -->
+  <div class="hero anim">
+    <div class="hero-slides" id="heroSlides">
+
+      <!-- SLIDE 1 — EOT Cranes -->
+      <div class="hero-slide">
+        <div class="slide-bg slide-bg-1">
+          <div class="slide-crane-art">
+            <svg viewBox="0 0 600 500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMaxYMax meet">
+              <!-- EOT Bridge Crane Silhouette -->
+              <g fill="white" opacity="0.9">
+                <!-- Main bridge girder -->
+                <rect x="30" y="140" width="540" height="22" rx="3"/>
+                <!-- End truck left -->
+                <rect x="20" y="162" width="80" height="16" rx="2"/>
+                <rect x="25" y="178" width="15" height="30" rx="2"/>
+                <rect x="55" y="178" width="15" height="30" rx="2"/>
+                <circle cx="32" cy="210" r="10" fill="none" stroke="white" stroke-width="3"/>
+                <circle cx="32" cy="210" r="4"/>
+                <circle cx="62" cy="210" r="10" fill="none" stroke="white" stroke-width="3"/>
+                <circle cx="62" cy="210" r="4"/>
+                <!-- End truck right -->
+                <rect x="500" y="162" width="80" height="16" rx="2"/>
+                <rect x="505" y="178" width="15" height="30" rx="2"/>
+                <rect x="535" y="178" width="15" height="30" rx="2"/>
+                <circle cx="512" cy="210" r="10" fill="none" stroke="white" stroke-width="3"/>
+                <circle cx="512" cy="210" r="4"/>
+                <circle cx="542" cy="210" r="10" fill="none" stroke="white" stroke-width="3"/>
+                <circle cx="542" cy="210" r="4"/>
+                <!-- Cross girder -->
+                <rect x="275" y="130" width="18" height="32" rx="2"/>
+                <!-- Crab/trolley -->
+                <rect x="240" y="162" width="100" height="20" rx="3"/>
+                <rect x="255" y="182" width="18" height="8" rx="2"/>
+                <rect x="307" y="182" width="18" height="8" rx="2"/>
+                <!-- Hoist unit -->
+                <rect x="265" y="190" width="60" height="35" rx="4"/>
+                <line x1="295" y1="225" x2="295" y2="320" stroke="white" stroke-width="3"/>
+                <!-- Hook assembly -->
+                <path d="M280 320 Q280 345 295 345 Q310 345 310 320" fill="none" stroke="white" stroke-width="3"/>
+                <path d="M295 345 Q295 360 285 360" fill="none" stroke="white" stroke-width="3.5"/>
+                <!-- Rails -->
+                <rect x="0" y="220" width="600" height="8" rx="2"/>
+                <!-- Structure columns -->
+                <rect x="20" y="230" width="12" height="270" rx="2"/>
+                <rect x="568" y="230" width="12" height="270" rx="2"/>
+                <!-- Diagonal bracing -->
+                <line x1="32" y1="230" x2="75" y2="340" stroke="white" stroke-width="2"/>
+                <line x1="32" y1="290" x2="75" y2="400" stroke="white" stroke-width="2"/>
+                <line x1="580" y1="230" x2="537" y2="340" stroke="white" stroke-width="2"/>
+                <line x1="580" y1="290" x2="537" y2="400" stroke="white" stroke-width="2"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+        <div class="slide-overlay"></div>
+        <div class="slide-content">
+          <div class="slide-tag" style="background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.4);color:#93c5fd;">🏆 India's Trusted Crane Manufacturer</div>
+          <div class="slide-title">
+            <span>Electric Overhead</span>
+            <span style="background:linear-gradient(135deg,#3b82f6,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Travelling Cranes</span>
+          </div>
+          <div class="slide-desc">Precision-engineered EOT cranes from 1T to 200T capacity. Custom-built for steel plants, automobile industries, and heavy engineering workshops across India.</div>
+          <div class="slide-btns">
+            <a href="leads.html" class="btn-pri">📋 View Lead Tracker →</a>
+            <a href="sales.html" class="btn-sec">💹 Sales Dashboard</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 2 — Gantry Cranes -->
+      <div class="hero-slide">
+        <div class="slide-bg slide-bg-2">
+          <div class="slide-crane-art">
+            <svg viewBox="0 0 600 500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMaxYMax meet">
+              <!-- Gantry Crane Silhouette -->
+              <g fill="white" opacity="0.9">
+                <!-- Main girder top -->
+                <rect x="40" y="100" width="520" height="24" rx="3"/>
+                <!-- Left leg -->
+                <rect x="40" y="124" width="25" height="280" rx="3"/>
+                <!-- Right leg -->
+                <rect x="535" y="124" width="25" height="280" rx="3"/>
+                <!-- Left leg diagonal brace -->
+                <line x1="40" y1="200" x2="80" y2="404" stroke="white" stroke-width="3"/>
+                <!-- Right leg diagonal brace -->
+                <line x1="560" y1="200" x2="520" y2="404" stroke="white" stroke-width="3"/>
+                <!-- Left base -->
+                <rect x="20" y="400" width="80" height="12" rx="3"/>
+                <circle cx="35" cy="416" r="8" fill="none" stroke="white" stroke-width="2.5"/>
+                <circle cx="85" cy="416" r="8" fill="none" stroke="white" stroke-width="2.5"/>
+                <!-- Right base -->
+                <rect x="500" y="400" width="80" height="12" rx="3"/>
+                <circle cx="515" cy="416" r="8" fill="none" stroke="white" stroke-width="2.5"/>
+                <circle cx="565" cy="416" r="8" fill="none" stroke="white" stroke-width="2.5"/>
+                <!-- Trolley -->
+                <rect x="220" y="124" width="120" height="18" rx="3"/>
+                <rect x="245" y="142" width="18" height="8" rx="2"/>
+                <rect x="297" y="142" width="18" height="8" rx="2"/>
+                <!-- Hoist -->
+                <rect x="255" y="150" width="50" height="30" rx="4"/>
+                <line x1="280" y1="180" x2="280" y2="290" stroke="white" stroke-width="3"/>
+                <!-- Hook -->
+                <path d="M265 290 Q265 315 280 315 Q295 315 295 290" fill="none" stroke="white" stroke-width="3"/>
+                <path d="M280 315 Q280 328 270 328" fill="none" stroke="white" stroke-width="3.5"/>
+                <!-- Ground rail -->
+                <rect x="0" y="424" width="600" height="6" rx="2"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+        <div class="slide-overlay" style="background:linear-gradient(to right,rgba(10,32,24,.92) 0%,rgba(10,32,24,.65) 55%,rgba(10,32,24,.15) 100%)"></div>
+        <div class="slide-content">
+          <div class="slide-tag" style="background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.4);color:#6ee7b7;">⚙️ Heavy Duty Solutions</div>
+          <div class="slide-title">
+            <span>Gantry &</span>
+            <span style="background:linear-gradient(135deg,#10b981,#14b8a6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Semi-Gantry Cranes</span>
+          </div>
+          <div class="slide-desc">Versatile gantry systems for outdoor yards, warehouses, and open-bay workshops. Available in single and double girder configurations with spans up to 40M.</div>
+          <div class="slide-btns">
+            <a href="projects.html" class="btn-pri" style="background:var(--green);">🔧 View Projects →</a>
+            <a href="leads.html" class="btn-sec">📋 Lead Pipeline</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 3 — Jib & Hoist -->
+      <div class="hero-slide">
+        <div class="slide-bg slide-bg-3">
+          <div class="slide-crane-art">
+            <svg viewBox="0 0 600 500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMaxYMax meet">
+              <!-- Jib Crane Silhouette -->
+              <g fill="white" opacity="0.9">
+                <!-- Vertical mast/column -->
+                <rect x="180" y="60" width="30" height="380" rx="4"/>
+                <!-- Jib arm -->
+                <rect x="210" y="100" width="320" height="20" rx="3"/>
+                <!-- Jib tie rod (diagonal) -->
+                <line x1="195" y1="75" x2="530" y2="110" stroke="white" stroke-width="3"/>
+                <!-- Trolley on jib -->
+                <rect x="360" y="120" width="70" height="16" rx="3"/>
+                <rect x="370" y="136" width="14" height="8" rx="2"/>
+                <rect x="406" y="136" width="14" height="8" rx="2"/>
+                <!-- Hoist unit -->
+                <rect x="375" y="144" width="40" height="28" rx="4"/>
+                <line x1="395" y1="172" x2="395" y2="300" stroke="white" stroke-width="3"/>
+                <!-- Hook -->
+                <path d="M383 300 Q383 322 395 322 Q407 322 407 300" fill="none" stroke="white" stroke-width="3"/>
+                <path d="M395 322 Q395 334 386 334" fill="none" stroke="white" stroke-width="3.5"/>
+                <!-- Column base plate -->
+                <rect x="155" y="440" width="80" height="14" rx="3"/>
+                <!-- Anchor bolts -->
+                <rect x="163" y="454" width="6" height="16" rx="2"/>
+                <rect x="175" y="454" width="6" height="16" rx="2"/>
+                <rect x="209" y="454" width="6" height="16" rx="2"/>
+                <rect x="221" y="454" width="6" height="16" rx="2"/>
+                <!-- Wall bracket (simplified) -->
+                <rect x="130" y="80" width="50" height="16" rx="3"/>
+                <rect x="130" y="200" width="50" height="16" rx="3"/>
+                <line x1="130" y1="96" x2="150" y2="200" stroke="white" stroke-width="2.5"/>
+                <line x1="130" y1="216" x2="160" y2="300" stroke="white" stroke-width="2.5"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+        <div class="slide-overlay" style="background:linear-gradient(to right,rgba(14,8,28,.92) 0%,rgba(14,8,28,.65) 55%,rgba(14,8,28,.15) 100%)"></div>
+        <div class="slide-content">
+          <div class="slide-tag" style="background:rgba(168,85,247,.15);border-color:rgba(168,85,247,.4);color:#d8b4fe;">📐 Compact Lifting Solutions</div>
+          <div class="slide-title">
+            <span>Jib Cranes &</span>
+            <span style="background:linear-gradient(135deg,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Electric Hoists</span>
+          </div>
+          <div class="slide-desc">Space-efficient jib cranes for workstations, pillar-mounted configurations, and wall-bracket types. Wire rope and chain hoists for every application.</div>
+          <div class="slide-btns">
+            <a href="services.html" class="btn-pri" style="background:var(--purple);">⚙️ Services Dashboard →</a>
+            <a href="design.html" class="btn-sec">📐 Design Status</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 4 — Company Overview -->
+      <div class="hero-slide">
+        <div class="slide-bg slide-bg-4">
+          <div class="slide-crane-art">
+            <svg viewBox="0 0 600 500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMaxYMax meet">
+              <!-- Factory / plant silhouette with multiple cranes -->
+              <g fill="white" opacity="0.85">
+                <!-- Factory building outline -->
+                <rect x="30" y="320" width="540" height="130" rx="0"/>
+                <rect x="30" y="320" width="540" height="130" fill="none" stroke="white" stroke-width="2"/>
+                <!-- Windows -->
+                <rect x="60" y="350" width="30" height="25" rx="2" fill="rgba(255,200,80,.3)" stroke="white" stroke-width="1.5"/>
+                <rect x="110" y="350" width="30" height="25" rx="2" fill="rgba(255,200,80,.3)" stroke="white" stroke-width="1.5"/>
+                <rect x="160" y="350" width="30" height="25" rx="2" fill="rgba(255,200,80,.3)" stroke="white" stroke-width="1.5"/>
+                <rect x="380" y="350" width="30" height="25" rx="2" fill="rgba(255,200,80,.3)" stroke="white" stroke-width="1.5"/>
+                <rect x="430" y="350" width="30" height="25" rx="2" fill="rgba(255,200,80,.3)" stroke="white" stroke-width="1.5"/>
+                <rect x="480" y="350" width="30" height="25" rx="2" fill="rgba(255,200,80,.3)" stroke="white" stroke-width="1.5"/>
+                <!-- Chimney stacks -->
+                <rect x="230" y="260" width="20" height="60" rx="3"/>
+                <rect x="280" y="240" width="20" height="80" rx="3"/>
+                <rect x="330" y="255" width="20" height="65" rx="3"/>
+                <!-- Mini EOT on top of factory -->
+                <!-- Rail on factory roof -->
+                <rect x="40" y="316" width="520" height="6" rx="2"/>
+                <!-- Crane on top -->
+                <rect x="50" y="280" width="250" height="16" rx="2"/>
+                <rect x="50" y="268" width="12" height="48" rx="2"/>
+                <rect x="288" y="268" width="12" height="48" rx="2"/>
+                <rect x="140" y="296" width="60" height="14" rx="2"/>
+                <line x1="170" y1="310" x2="170" y2="340" stroke="white" stroke-width="2"/>
+                <path d="M160 340 Q160 352 170 352 Q180 352 180 340" fill="none" stroke="white" stroke-width="2"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+        <div class="slide-overlay" style="background:linear-gradient(to right,rgba(15,10,0,.92) 0%,rgba(15,10,0,.65) 55%,rgba(15,10,0,.15) 100%)"></div>
+        <div class="slide-content">
+          <div class="slide-tag" style="background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.4);color:#fcd34d;">🏗️ Est. Since Decades</div>
+          <div class="slide-title">
+            <span>Malgudi Cranes &</span>
+            <span style="background:linear-gradient(135deg,#f59e0b,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Equipments Pvt Ltd</span>
+          </div>
+          <div class="slide-desc">A complete material handling solutions company — design, manufacture, supply, erection, and annual maintenance of industrial cranes across India.</div>
+          <div class="slide-btns">
+            <a href="accounts.html" class="btn-pri" style="background:var(--amber);color:#000;">🏦 Accounts →</a>
+            <a href="leads.html" class="btn-sec">📋 Full BI Hub</a>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /hero-slides -->
+
+    <!-- CONTROLS -->
+    <div class="slide-dots" id="slideDots">
+      <div class="sdot active" onclick="goSlide(0)"></div>
+      <div class="sdot" onclick="goSlide(1)"></div>
+      <div class="sdot" onclick="goSlide(2)"></div>
+      <div class="sdot" onclick="goSlide(3)"></div>
+    </div>
+    <div class="slide-arrows">
+      <div class="sarrow" onclick="prevSlide()">‹</div>
+      <div class="sarrow" onclick="nextSlide()">›</div>
+    </div>
+    <div class="slide-counter"><span id="slideNum">1</span> / 4</div>
+    <div class="slide-progress" id="slideProgress"></div>
+  </div><!-- /hero -->
+
+  <!-- KPI STRIP -->
+  <div class="kpi-strip">
+    <a class="strip-card anim d1" href="leads.html">
+      <div class="strip-ico" style="background:rgba(99,102,241,.15);">📋</div>
+      <div>
+        <div class="strip-val" id="h-leads">—</div>
+        <div class="strip-lbl">Total Leads</div>
+        <div class="strip-delta delta-up" id="h-leads-d">FY 2025–26</div>
+      </div>
+    </a>
+    <a class="strip-card anim d2" href="leads.html">
+      <div class="strip-ico" style="background:rgba(16,185,129,.15);">🏆</div>
+      <div>
+        <div class="strip-val" id="h-won">—</div>
+        <div class="strip-lbl">Orders Won</div>
+        <div class="strip-delta delta-up" id="h-conv">—% conv.</div>
+      </div>
+    </a>
+    <a class="strip-card anim d3" href="leads.html">
+      <div class="strip-ico" style="background:rgba(59,130,246,.15);">💰</div>
+      <div>
+        <div class="strip-val" id="h-rev">—</div>
+        <div class="strip-lbl">Pipeline Value</div>
+        <div class="strip-delta delta-up">Expected</div>
+      </div>
+    </a>
+    <a class="strip-card anim d4" href="projects.html">
+      <div class="strip-ico" style="background:rgba(245,158,11,.15);">🔧</div>
+      <div>
+        <div class="strip-val" id="h-proj">—</div>
+        <div class="strip-lbl">Active Projects</div>
+        <div class="strip-delta" style="color:var(--amber)">In progress</div>
+      </div>
+    </a>
+    <a class="strip-card anim d5" href="services.html">
+      <div class="strip-ico" style="background:rgba(6,182,212,.15);">⚙️</div>
+      <div>
+        <div class="strip-val" id="h-svc">—</div>
+        <div class="strip-lbl">Service Tickets</div>
+        <div class="strip-delta" style="color:var(--cyan)">Open</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- CHARTS + COMPANY INFO -->
+  <div class="home-grid">
+    <!-- Revenue Trend -->
+    <div class="card anim">
+      <div class="card-hdr">
+        <div class="card-title">📈 Monthly Revenue Pipeline</div>
+        <div class="card-sub">Expected order value trend — all leads</div>
+      </div>
+      <div class="mini-chart-wrap"><canvas id="c-home-rev"></canvas></div>
+    </div>
+    <!-- Company Info -->
+    <div class="company-card anim d2">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+        <div class="company-mark">🏗️</div>
+        <div>
+          <div class="company-fullname">Malgudi Cranes &<br>Equipments Pvt Ltd</div>
+          <div class="company-reg">CIN: U28910XXXXXX — Estd. 1990s</div>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-item"><div class="info-key">Industry</div><div class="info-val">Material Handling</div></div>
+        <div class="info-item"><div class="info-key">Products</div><div class="info-val">EOT, Gantry, Jib</div></div>
+        <div class="info-item"><div class="info-key">Capacity Range</div><div class="info-val">1T – 200T</div></div>
+        <div class="info-item"><div class="info-key">Pan India</div><div class="info-val">25+ States</div></div>
+        <div class="info-item"><div class="info-key">HQ</div><div class="info-val">Pune, Maharashtra</div></div>
+        <div class="info-item"><div class="info-key">Standards</div><div class="info-val">IS:3177 / FEM</div></div>
+      </div>
+      <!-- Quick Access -->
+      <div style="margin-top:14px;">
+        <div class="sec-title">Quick Access</div>
+        <div class="quick-access">
+          <a href="leads.html" class="qa-card"><div class="qa-ico" style="background:rgba(99,102,241,.15)">📋</div><div><div class="qa-name">Leads</div><div class="qa-desc">Funnel & analytics</div></div><span class="qa-arrow">›</span></a>
+          <a href="sales.html" class="qa-card"><div class="qa-ico" style="background:rgba(16,185,129,.15)">💹</div><div><div class="qa-name">Sales</div><div class="qa-desc">Revenue tracking</div></div><span class="qa-arrow">›</span></a>
+          <a href="projects.html" class="qa-card"><div class="qa-ico" style="background:rgba(245,158,11,.15)">🔧</div><div><div class="qa-name">Projects</div><div class="qa-desc">Pipeline status</div></div><span class="qa-arrow">›</span></a>
+          <a href="services.html" class="qa-card"><div class="qa-ico" style="background:rgba(6,182,212,.15)">⚙️</div><div><div class="qa-name">Services</div><div class="qa-desc">AMC & tickets</div></div><span class="qa-arrow">›</span></a>
+          <a href="design.html" class="qa-card"><div class="qa-ico" style="background:rgba(168,85,247,.15)">📐</div><div><div class="qa-name">Design</div><div class="qa-desc">Job allocation</div></div><span class="qa-arrow">›</span></a>
+          <a href="accounts.html" class="qa-card"><div class="qa-ico" style="background:rgba(244,63,94,.15)">🏦</div><div><div class="qa-name">Accounts</div><div class="qa-desc">Revenue & AR</div></div><span class="qa-arrow">›</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3-CHART ROW -->
+  <div class="home-grid-3">
+    <div class="card anim">
+      <div class="card-hdr"><div class="card-title">🔀 Sales Funnel</div><div class="card-sub">Inquiry to Won conversion</div></div>
+      <div class="mini-chart-wrap"><canvas id="c-home-funnel"></canvas></div>
+    </div>
+    <div class="card anim d2">
+      <div class="card-hdr"><div class="card-title">🗺 By State</div><div class="card-sub">Lead geographic spread</div></div>
+      <div class="mini-chart-wrap"><canvas id="c-home-state"></canvas></div>
+    </div>
+    <div class="card anim d3">
+      <div class="card-hdr"><div class="card-title">📦 By Product</div><div class="card-sub">Revenue distribution</div></div>
+      <div class="mini-chart-wrap"><canvas id="c-home-prod"></canvas></div>
+    </div>
+  </div>
+
+  <div style="text-align:center;color:var(--txt3);font-size:.72rem;padding:12px 0 24px;font-family:var(--mono);" id="lastUpdated">—</div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+buildNav('home');
+
+// ── SLIDER ──
+let slideIdx = 0, slideTimer = null, progTimer = null;
+const TOTAL = 4, AUTO_SEC = 6;
+
+function goSlide(i) {
+  slideIdx = (i + TOTAL) % TOTAL;
+  document.getElementById('heroSlides').style.transform = `translateX(-${slideIdx * 100}%)`;
+  document.getElementById('slideNum').textContent = slideIdx + 1;
+  document.querySelectorAll('.sdot').forEach((d,j) => d.classList.toggle('active', j === slideIdx));
+  resetProgress();
+}
+function nextSlide() { goSlide(slideIdx + 1); }
+function prevSlide() { goSlide(slideIdx - 1); }
+
+function resetProgress() {
+  const pb = document.getElementById('slideProgress');
+  pb.style.transition = 'none';
+  pb.style.width = '0%';
+  setTimeout(() => { pb.style.transition = `width ${AUTO_SEC}s linear`; pb.style.width = '100%'; }, 50);
+}
+
+function startAuto() {
+  clearInterval(slideTimer);
+  slideTimer = setInterval(nextSlide, AUTO_SEC * 1000);
+  resetProgress();
+}
+
+const hero = document.querySelector('.hero');
+hero.addEventListener('mouseenter', () => { clearInterval(slideTimer); document.getElementById('slideProgress').style.transition = 'none'; });
+hero.addEventListener('mouseleave', startAuto);
+startAuto();
+
+// touch/swipe support
+let touchX = 0;
+hero.addEventListener('touchstart', e => touchX = e.touches[0].clientX);
+hero.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchX;
+  if (Math.abs(dx) > 50) dx < 0 ? nextSlide() : prevSlide();
+});
+
+// ── SAMPLE DATA ──
+const SAMPLE = [
+  {State:'Maharashtra','Product Type':'EOT Crane','Lead Source':'Reference','Lead Owner':'Amit Shah','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':1850000,'Date':'2025-01-05','Quotation No':'QT-001'},
+  {State:'Karnataka','Product Type':'EOT Crane','Lead Source':'Direct','Lead Owner':'Rajesh Nair','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':5800000,'Date':'2025-01-18','Quotation No':'QT-005'},
+  {State:'Telangana','Product Type':'Gantry Crane','Lead Source':'Reference','Lead Owner':'Rajesh Nair','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':1650000,'Date':'2025-02-18','Quotation No':'QT-013'},
+  {State:'Gujarat','Product Type':'EOT Crane','Lead Source':'Direct','Lead Owner':'Amit Shah','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':8500000,'Date':'2025-04-24','Quotation No':'QT-027'},
+  {State:'Maharashtra','Product Type':'LCS Crane','Lead Source':'Reference','Lead Owner':'Priya Sharma','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':1260000,'Date':'2025-05-12','Quotation No':'QT-030'},
+  {State:'Uttar Pradesh','Product Type':'EOT Crane','Lead Source':'Reference','Lead Owner':'Rajesh Nair','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':4800000,'Date':'2025-06-21','Quotation No':'QT-038'},
+  {State:'Gujarat','Product Type':'EOT Crane','Lead Source':'Govt Tender','Lead Owner':'Priya Sharma','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':2100000,'Date':'2025-05-24','Quotation No':'QT-032'},
+  {State:'Jharkhand','Product Type':'EOT Crane','Lead Source':'Exhibition','Lead Owner':'Amit Shah','Inquiry Status':'Lost','Quotation Status':'Rejected','Expected Order Value':3200000,'Date':'2025-01-10','Quotation No':'QT-003'},
+  {State:'Gujarat','Product Type':'EOT Crane','Lead Source':'Exhibition','Lead Owner':'Rajesh Nair','Inquiry Status':'Lost','Quotation Status':'Rejected','Expected Order Value':4200000,'Date':'2025-02-08','Quotation No':'QT-010'},
+  {State:'Maharashtra','Product Type':'Hoist','Lead Source':'Website','Lead Owner':'Priya Sharma','Inquiry Status':'Quotation Sent','Quotation Status':'Pending','Expected Order Value':285000,'Date':'2025-01-14','Quotation No':'QT-004'},
+  {State:'Maharashtra','Product Type':'Gantry Crane','Lead Source':'LinkedIn','Lead Owner':'Priya Sharma','Inquiry Status':'Inquiry','Quotation Status':'','Expected Order Value':950000,'Date':'2025-01-25','Quotation No':''},
+  {State:'Maharashtra','Product Type':'EOT Crane','Lead Source':'Reference','Lead Owner':'Amit Shah','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':1250000,'Date':'2025-02-01','Quotation No':'QT-008'},
+  {State:'Maharashtra','Product Type':'EOT Crane','Lead Source':'Existing','Lead Owner':'Amit Shah','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':3800000,'Date':'2025-03-05','Quotation No':'QT-016'},
+  {State:'Haryana','Product Type':'Jib Crane','Lead Source':'Reference','Lead Owner':'Rajesh Nair','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':380000,'Date':'2025-03-01','Quotation No':'QT-015'},
+  {State:'Maharashtra','Product Type':'EOT Crane','Lead Source':'Reference','Lead Owner':'Amit Shah','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':1580000,'Date':'2025-04-01','Quotation No':'QT-021'},
+];
+
+async function loadHome() {
+  const resp = await fetchData('leads', 'limit=1000');
+  const leads = (resp && resp.data) ? resp.data : SAMPLE;
+  const src   = resp ? (resp.source || 'api') : 'sample';
+
+  updateSyncStatus(src);
+
+  const won     = leads.filter(l => /won|confirmed/i.test(l['Inquiry Status']||''));
+  const rev     = leads.reduce((s,l) => s + parseVal(l['Expected Order Value']), 0);
+  const convPct = leads.length ? ((won.length / leads.length)*100).toFixed(1) : 0;
+
+  setV('h-leads', leads.length);
+  setV('h-won', won.length);
+  setV('h-rev', fmtINR(rev));
+  setV('h-conv', convPct + '%');
+  setV('h-proj', '—'); // placeholder until projects.html has data
+  setV('h-svc',  '—');
+
+  const O = getChartOpts();
+
+  // Revenue trend
+  const monthly = {};
+  leads.forEach(l => { const k = monthKey(l['Date']); if(k) monthly[k] = (monthly[k]||0)+parseVal(l['Expected Order Value']); });
+  const sm = sortMonths(monthly);
+  mkChart('c-home-rev', {
+    type:'line',
+    data:{labels:Object.keys(sm), datasets:[{label:'Pipeline ₹',data:Object.values(sm),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.08)',fill:true,tension:.4,pointRadius:4,borderWidth:2.5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...O.tt,callbacks:{label:c=>' '+fmtINR(c.raw)}}},
+      scales:{x:{grid:{color:O.grid}},y:{grid:{color:O.grid},ticks:{callback:v=>fmtINR(v)}}}}
+  });
+
+  // Funnel bar
+  const quots = leads.filter(l => l['Quotation No'] && String(l['Quotation No']).trim()).length;
+  const lost  = leads.filter(l => /lost|rejected/i.test(l['Inquiry Status']||'')).length;
+  mkChart('c-home-funnel', {
+    type:'bar',
+    data:{labels:['Inquiry','Quotation','Won','Lost'],
+      datasets:[{data:[leads.length,quots,won.length,lost],backgroundColor:['#6366f1','#3b82f6','#10b981','#ef4444'],borderRadius:8,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:O.tt},
+      scales:{x:{grid:{color:O.grid}},y:{grid:{color:O.grid},beginAtZero:true}}}
+  });
+
+  // State doughnut
+  const byState = groupBy(leads,'State');
+  const topSt = Object.entries(byState).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  mkChart('c-home-state', {
+    type:'doughnut',
+    data:{labels:topSt.map(e=>e[0]),datasets:[{data:topSt.map(e=>e[1]),backgroundColor:MALGUDI.COLORS,borderWidth:2,borderColor:'transparent',hoverOffset:6}]},
+    options:{cutout:'56%',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:5,font:{size:10}}},tooltip:O.tt}}
+  });
+
+  // Product doughnut
+  const byProd = sumByKey(leads,'Product Type','Expected Order Value');
+  mkChart('c-home-prod', {
+    type:'doughnut',
+    data:{labels:Object.keys(byProd),datasets:[{data:Object.values(byProd),backgroundColor:MALGUDI.COLORS,borderWidth:2,borderColor:'transparent',hoverOffset:6}]},
+    options:{cutout:'56%',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:5,font:{size:10}}},
+        tooltip:{...O.tt,callbacks:{label:c=>` ${c.label}: ${fmtINR(c.raw)}`}}}}
+  });
+
+  setV('lastUpdated', 'Last updated: ' + new Date().toLocaleTimeString());
+  setV('lastSync', 'Synced: ' + new Date().toLocaleTimeString());
+}
+
+function redrawCharts() {
+  Object.values(CH).forEach(c => c && c.destroy && c.destroy());
+  Object.keys(CH).forEach(k => delete CH[k]);
+  loadHome();
+}
+
+loadHome();
+startCountdown(30, c => setV('cdown', c), loadHome);
+</script>
+</body>
+</html>

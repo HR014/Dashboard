@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design — Malgudi BI Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<script src="shared/nav.js"></script><script>initTheme();</script>
+<header class="header">
+  <div class="hdr-brand"><div class="hdr-logo">📐</div><div><div class="hdr-name">Design Jobs</div><div class="hdr-sub">Allocation & TAT Monitoring</div></div></div>
+  <nav class="hdr-nav" id="mainNav"></nav>
+  <div class="hdr-right">
+    <div class="refresh-bar"><span class="pulse"></span><span id="cdown">30</span>s</div>
+    <button class="btn-sm" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+    <div class="user-pill" onclick="doLogout()"><div class="user-av" id="userAv">A</div><span id="userNm">admin</span></div>
+  </div>
+</header>
+<main class="main">
+<div class="kpi-grid">
+  <div class="kpi-card" style="--kc:#a855f7"><div class="kpi-ico">📐</div><div class="kpi-lbl">Active Jobs</div><div class="kpi-val">9</div><div class="kpi-sub">In design</div></div>
+  <div class="kpi-card" style="--kc:#10b981"><div class="kpi-ico">✅</div><div class="kpi-lbl">Completed</div><div class="kpi-val">24</div><div class="kpi-sub">This month</div></div>
+  <div class="kpi-card" style="--kc:#f59e0b"><div class="kpi-ico">⏳</div><div class="kpi-lbl">Avg TAT</div><div class="kpi-val">4.2d</div><div class="kpi-sub">Design + drawing</div></div>
+  <div class="kpi-card" style="--kc:#ef4444"><div class="kpi-ico">⚠️</div><div class="kpi-lbl">Overdue</div><div class="kpi-val">2</div><div class="kpi-sub">Past deadline</div></div>
+  <div class="kpi-card" style="--kc:#06b6d4"><div class="kpi-ico">🔄</div><div class="kpi-lbl">Revisions</div><div class="kpi-val">6</div><div class="kpi-sub">Client changes</div></div>
+</div>
+<div class="row row-3">
+  <div class="card"><div class="card-hdr"><div class="card-title">Jobs by Designer</div><div class="card-sub">Workload distribution</div></div><canvas id="cDesigner" height="220"></canvas></div>
+  <div class="card"><div class="card-hdr"><div class="card-title">Job Status</div><div class="card-sub">Current stage breakdown</div></div><canvas id="cDesignStatus" height="220"></canvas></div>
+  <div class="card"><div class="card-hdr"><div class="card-title">TAT Trend</div><div class="card-sub">Avg days per job type</div></div><canvas id="cDesignTAT" height="220"></canvas></div>
+</div>
+<div class="tbl-card">
+  <div class="tbl-top"><div style="font-weight:700;font-size:.88rem">Active Design Jobs</div></div>
+  <div class="tbl-wrap">
+    <table><thead><tr><th>Job #</th><th>Project</th><th>Type</th><th>Assigned To</th><th>Start</th><th>Deadline</th><th>Status</th><th>% Done</th></tr></thead>
+    <tbody>
+      <tr><td style="font-family:var(--mono);color:var(--txt3)">DG-112</td><td><b>NTPC 20T EOT</b></td><td>GA Drawing</td><td>Sanjay V</td><td>2025-07-01</td><td>2025-07-18</td><td><span class="badge b-prog">🔄 In Progress</span></td><td><b>60%</b></td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--txt3)">DG-111</td><td><b>Torrent Gantry</b></td><td>Detail Design</td><td>Meera P</td><td>2025-07-05</td><td>2025-07-20</td><td><span class="badge b-high">⚠️ Overdue</span></td><td><b>45%</b></td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--txt3)">DG-110</td><td><b>JSW EOT Crane</b></td><td>BOM</td><td>Sanjay V</td><td>2025-07-10</td><td>2025-07-22</td><td><span class="badge b-done">✅ Completed</span></td><td><b>100%</b></td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--txt3)">DG-109</td><td><b>L&T Hoist</b></td><td>Structural</td><td>Arun S</td><td>2025-07-12</td><td>2025-07-25</td><td><span class="badge b-inq">🔵 Review</span></td><td><b>85%</b></td></tr>
+    </tbody></table>
+  </div>
+</div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+buildNav('design');
+const O = getChartOpts();
+mkChart('cDesigner',{type:'bar',data:{labels:['Sanjay V','Meera P','Arun S','Pradeep K'],datasets:[{data:[8,6,5,5],backgroundColor:['#a855f7','#6366f1','#3b82f6','#06b6d4'],borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:O.tt},scales:{x:{grid:{color:O.grid}},y:{grid:{color:O.grid},beginAtZero:true}}}});
+mkChart('cDesignStatus',{type:'doughnut',data:{labels:['In Progress','Review','Completed','Overdue','On Hold'],datasets:[{data:[5,3,14,2,1],backgroundColor:['#3b82f6','#f59e0b','#10b981','#ef4444','#a855f7'],borderWidth:2,borderColor:'transparent',hoverOffset:6}]},options:{cutout:'56%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:5,font:{size:10}}},tooltip:O.tt}}});
+mkChart('cDesignTAT',{type:'bar',data:{labels:['GA Drawing','Detail Design','BOM','Structural','Electrical'],datasets:[{label:'Avg Days',data:[4.5,7.2,2.8,5.1,3.6],backgroundColor:'rgba(168,85,247,.7)',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:O.tt},scales:{x:{grid:{color:O.grid}},y:{grid:{color:O.grid},beginAtZero:true}}}});
+startCountdown(30, c => setV('cdown',c), ()=>{});
+</script>
+</body></html>

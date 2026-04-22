@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Design</title>
+<link rel="stylesheet" href="shared/style.css">
+<script src="shared/nav.js"></script>
+<script src="shared/api.js"></script>
+</head>
+<body>
+<header><nav id="mainNav"></nav></header>
+<script>
+buildNav('design');
+async function load(){
+const res = await fetchData("projects");
+console.log(res.data.filter(d=>d.Stage==="Design"));
+}
+load();
+</script>
+</body>
+</html>

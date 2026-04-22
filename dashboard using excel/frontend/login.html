@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Login</title>
+<link rel="stylesheet" href="shared/style.css">
+<script src="shared/auth.js"></script>
+</head>
+<body class="login-overlay">
+<div class="login-card">
+<h2>Login</h2>
+<input id="user" placeholder="Username">
+<input id="pass" placeholder="Password">
+<button onclick="doLogin()">Login</button>
+</div>
+<script>
+function doLogin(){
+  const u = document.getElementById("user").value;
+  if(u==="admin"){ login("admin","admin"); }
+  else{ login(u,"user"); }
+}
+</script>
+</body>
+</html>

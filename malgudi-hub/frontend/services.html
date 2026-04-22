@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Services — Malgudi BI Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<script src="shared/nav.js"></script><script>initTheme();</script>
+<header class="header">
+  <div class="hdr-brand"><div class="hdr-logo">⚙️</div><div><div class="hdr-name">Services</div><div class="hdr-sub">Tickets & AMC Tracking</div></div></div>
+  <nav class="hdr-nav" id="mainNav"></nav>
+  <div class="hdr-right">
+    <div class="refresh-bar"><span class="pulse"></span><span id="cdown">30</span>s</div>
+    <button class="btn-sm" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+    <div class="user-pill" onclick="doLogout()"><div class="user-av" id="userAv">A</div><span id="userNm">admin</span></div>
+  </div>
+</header>
+<main class="main">
+<div class="kpi-grid">
+  <div class="kpi-card" style="--kc:#06b6d4"><div class="kpi-ico">🎫</div><div class="kpi-lbl">Open Tickets</div><div class="kpi-val">14</div><div class="kpi-sub">Pending</div></div>
+  <div class="kpi-card" style="--kc:#10b981"><div class="kpi-ico">✅</div><div class="kpi-lbl">Resolved</div><div class="kpi-val">48</div><div class="kpi-sub">This month</div></div>
+  <div class="kpi-card" style="--kc:#f59e0b"><div class="kpi-ico">⏱️</div><div class="kpi-lbl">Avg TAT</div><div class="kpi-val">2.4d</div><div class="kpi-sub">Resolution time</div></div>
+  <div class="kpi-card" style="--kc:#a855f7"><div class="kpi-ico">📋</div><div class="kpi-lbl">AMC Contracts</div><div class="kpi-val">23</div><div class="kpi-sub">Active</div></div>
+  <div class="kpi-card" style="--kc:#ef4444"><div class="kpi-ico">⚠️</div><div class="kpi-lbl">AMC Expiring</div><div class="kpi-val">5</div><div class="kpi-sub">Next 30 days</div></div>
+  <div class="kpi-card" style="--kc:#3b82f6"><div class="kpi-ico">💰</div><div class="kpi-lbl">Service Revenue</div><div class="kpi-val">₹18.5L</div><div class="kpi-sub">FY 2025–26</div></div>
+</div>
+<div class="row row-3">
+  <div class="card"><div class="card-hdr"><div class="card-title">Ticket Status</div><div class="card-sub">Open vs closed</div></div><canvas id="cSvcTicket" height="220"></canvas></div>
+  <div class="card"><div class="card-hdr"><div class="card-title">Tickets by Type</div><div class="card-sub">Breakdown by service category</div></div><canvas id="cSvcType" height="220"></canvas></div>
+  <div class="card"><div class="card-hdr"><div class="card-title">Monthly Service Revenue</div><div class="card-sub">AMC + breakdown revenue</div></div><canvas id="cSvcRev" height="220"></canvas></div>
+</div>
+<div class="tbl-card">
+  <div class="tbl-top"><div style="font-weight:700;font-size:.88rem">Recent Service Tickets</div></div>
+  <div class="tbl-wrap">
+    <table><thead><tr><th>Ticket #</th><th>Client</th><th>Type</th><th>Crane</th><th>Reported</th><th>Engineer</th><th>Priority</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td style="font-family:var(--mono);color:var(--txt3)">SV-0084</td><td><b>JSW Steel</b></td><td>Breakdown</td><td>10T EOT</td><td>2025-08-01</td><td>Ramesh K</td><td><span class="badge b-high">🔴 High</span></td><td><span class="badge b-prog">🔄 In Progress</span></td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--txt3)">SV-0083</td><td><b>Kalyani Steel</b></td><td>Preventive</td><td>3T EOT</td><td>2025-07-30</td><td>Suresh M</td><td><span class="badge b-med">🟡 Med</span></td><td><span class="badge b-done">✅ Resolved</span></td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--txt3)">SV-0082</td><td><b>CEAT Ltd</b></td><td>AMC Visit</td><td>5T EOT</td><td>2025-07-28</td><td>Ramesh K</td><td><span class="badge b-low">🟢 Low</span></td><td><span class="badge b-done">✅ Resolved</span></td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--txt3)">SV-0081</td><td><b>Thermax</b></td><td>Breakdown</td><td>Gantry 15T</td><td>2025-07-25</td><td>Vivek T</td><td><span class="badge b-high">🔴 High</span></td><td><span class="badge b-pend">⏳ Pending Parts</span></td></tr>
+      <tr><td style="font-family:var(--mono);color:var(--txt3)">SV-0080</td><td><b>Bajaj Auto</b></td><td>Inspection</td><td>2T Jib</td><td>2025-07-22</td><td>Suresh M</td><td><span class="badge b-low">🟢 Low</span></td><td><span class="badge b-done">✅ Resolved</span></td></tr>
+    </tbody></table>
+  </div>
+</div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+buildNav('services');
+const O = getChartOpts();
+mkChart('cSvcTicket',{type:'doughnut',data:{labels:['Open','In Progress','Pending Parts','Resolved'],datasets:[{data:[6,5,3,48],backgroundColor:['#ef4444','#f59e0b','#a855f7','#10b981'],borderWidth:2,borderColor:'transparent',hoverOffset:6}]},options:{cutout:'56%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:5,font:{size:10}}},tooltip:O.tt}}});
+mkChart('cSvcType',{type:'bar',data:{labels:['Breakdown','AMC Visit','Preventive','Inspection','Installation'],datasets:[{data:[18,24,15,12,8],backgroundColor:MALGUDI.COLORS,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:O.tt},scales:{x:{grid:{color:O.grid}},y:{grid:{color:O.grid},beginAtZero:true}}}});
+mkChart('cSvcRev',{type:'line',data:{labels:['Apr','May','Jun','Jul','Aug'],datasets:[{label:'Revenue (₹L)',data:[2.8,3.1,3.5,4.2,4.9],borderColor:'#06b6d4',backgroundColor:'rgba(6,182,212,.1)',fill:true,tension:.4,pointRadius:5,borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:O.tt},scales:{x:{grid:{color:O.grid}},y:{grid:{color:O.grid},beginAtZero:false}}}});
+startCountdown(30, c => setV('cdown',c), ()=>{});
+</script>
+</body></html>

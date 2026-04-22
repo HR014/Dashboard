@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lead Tracker — Malgudi BI Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<script src="shared/nav.js"></script>
+<script>initTheme();</script>
+<header class="header">
+  <div class="hdr-brand"><div class="hdr-logo">📋</div><div><div class="hdr-name">Lead Tracker</div><div class="hdr-sub">Malgudi Cranes BI Hub</div></div></div>
+  <nav class="hdr-nav" id="mainNav"></nav>
+  <div class="hdr-right">
+    <span id="syncStatus" style="font-size:.75rem;display:flex;align-items:center;gap:5px;"></span>
+    <div class="refresh-bar"><span class="pulse"></span><span id="cdown">30</span>s</div>
+    <button class="btn-sm green" onclick="exportLeads()">⬇ Export</button>
+    <button class="btn-sm" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+    <div class="user-pill" onclick="doLogout()"><div class="user-av" id="userAv">A</div><span id="userNm">admin</span></div>
+  </div>
+</header>
+
+<!-- FILTERS -->
+<div class="filter-bar">
+  <div class="fg"><label>📅 From</label><input type="date" id="fFrom" onchange="applyFilters()"></div>
+  <div class="fg"><label>To</label><input type="date" id="fTo" onchange="applyFilters()"></div>
+  <div class="fg"><label>🗺 State</label><select id="fState" onchange="applyFilters()"><option value="">All States</option></select></div>
+  <div class="fg"><label>📦 Product</label><select id="fProd" onchange="applyFilters()"><option value="">All Products</option></select></div>
+  <div class="fg"><label>👤 Owner</label><select id="fOwner" onchange="applyFilters()"><option value="">All Owners</option></select></div>
+  <div class="fg"><label>📡 Source</label><select id="fSrc" onchange="applyFilters()"><option value="">All Sources</option></select></div>
+  <div class="fg"><label>🔁 Status</label><select id="fStatus" onchange="applyFilters()"><option value="">All Status</option></select></div>
+  <button class="btn-rst" onclick="resetFilters()">↺ Reset</button>
+</div>
+
+<main class="main">
+<!-- KPI CARDS -->
+<div class="kpi-grid">
+  <div class="kpi-card" style="--kc:#6366f1"><div class="kpi-ico">📋</div><div class="kpi-lbl">Total Leads</div><div class="kpi-val" id="vTotal">—</div><div class="kpi-sub">FY 2025–26</div></div>
+  <div class="kpi-card" style="--kc:#06b6d4"><div class="kpi-ico">🔥</div><div class="kpi-lbl">Active</div><div class="kpi-val" id="vActive">—</div><div class="kpi-sub">Open pipeline</div></div>
+  <div class="kpi-card" style="--kc:#f59e0b"><div class="kpi-ico">📄</div><div class="kpi-lbl">Quotations</div><div class="kpi-val" id="vQuot">—</div><div class="kpi-sub">Generated</div></div>
+  <div class="kpi-card" style="--kc:#10b981"><div class="kpi-ico">🏆</div><div class="kpi-lbl">Orders Won</div><div class="kpi-val" id="vWon">—</div><div class="kpi-sub" id="dWon">Confirmed</div></div>
+  <div class="kpi-card" style="--kc:#ef4444"><div class="kpi-ico">❌</div><div class="kpi-lbl">Orders Lost</div><div class="kpi-val" id="vLost">—</div><div class="kpi-sub">Not converted</div></div>
+  <div class="kpi-card" style="--kc:#a855f7"><div class="kpi-ico">📈</div><div class="kpi-lbl">Conversion %</div><div class="kpi-val" id="vConv">—</div><div class="kpi-sub">Won / Total</div></div>
+  <div class="kpi-card span2" style="--kc:#3b82f6"><div class="kpi-ico">💰</div><div class="kpi-lbl">Pipeline Value</div><div class="kpi-val" id="vRev">—</div><div class="kpi-sub">Expected orders</div></div>
+  <div class="kpi-card span2" style="--kc:#10b981"><div class="kpi-ico">🏦</div><div class="kpi-lbl">Won Revenue</div><div class="kpi-val" id="vWonRev">—</div><div class="kpi-sub">Confirmed value</div></div>
+</div>
+
+<!-- FUNNEL + PIE ROW -->
+<div class="row row-3" style="margin-bottom:14px;">
+  <div class="card">
+    <div class="card-hdr"><div class="card-title">Sales Funnel</div><div class="card-sub">Inquiry → Quotation → Won/Lost</div></div>
+    <canvas id="cFunnel" height="220"></canvas>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-title">Leads by Source</div><div class="card-sub">Distribution by channel</div></div>
+    <canvas id="cSource" height="220"></canvas>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-title">Revenue by Product</div><div class="card-sub">Expected value breakdown</div></div>
+    <canvas id="cProduct" height="220"></canvas>
+  </div>
+</div>
+
+<!-- TREND + STATE -->
+<div class="row row-21" style="margin-bottom:14px;">
+  <div class="card">
+    <div class="card-hdr"><div class="card-title">Monthly Lead Trend</div><div class="card-sub">Leads received vs Quotations vs Won</div></div>
+    <canvas id="cTrend" height="160"></canvas>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-title">Leads by State</div><div class="card-sub">Geographic distribution</div></div>
+    <canvas id="cState" height="260"></canvas>
+  </div>
+</div>
+
+<!-- OWNER + LOSS + REV STATE -->
+<div class="row row-3" style="margin-bottom:14px;">
+  <div class="card">
+    <div class="card-hdr"><div class="card-title">Salesperson Performance</div><div class="card-sub">Leads, Won & Conversion %</div></div>
+    <canvas id="cOwner" height="220"></canvas>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-title">Order Loss Analysis</div><div class="card-sub">Root cause of lost deals</div></div>
+    <canvas id="cLoss" height="220"></canvas>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-title">Revenue by State</div><div class="card-sub">Expected order value</div></div>
+    <canvas id="cRevState" height="220"></canvas>
+  </div>
+</div>
+
+<!-- TABLE -->
+<div class="tbl-card">
+  <div class="tbl-top">
+    <div><div style="font-weight:700;font-size:.88rem;">Lead Register</div><div style="font-size:.7rem;color:var(--txt3)" id="tblCount">—</div></div>
+    <input class="tbl-search" id="tblSearch" placeholder="🔍 Search company, contact, state..." oninput="searchTable()">
+  </div>
+  <div class="tbl-wrap">
+    <table><thead><tr><th>#</th><th>Date</th><th>Company</th><th>Location</th><th>State</th><th>Product</th><th>Contact</th><th>Owner</th><th>Source</th><th>Quot No</th><th>Order Value</th><th>Status</th><th>Remarks</th></tr></thead>
+    <tbody id="leadsBody"></tbody></table>
+  </div>
+  <div class="tbl-pag">
+    <button class="btn-pg" id="btnPrev" onclick="changePage(-1)">← Prev</button>
+    <span id="pageInfo">Page 1</span>
+    <button class="btn-pg" id="btnNext" onclick="changePage(1)">Next →</button>
+  </div>
+</div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+buildNav('leads');
+
+const SAMPLE = [
+  {Sr:1,Date:'2025-01-05',Company:'Kalyani Steel Ltd',Location:'Pune',State:'Maharashtra','Product Type':'EOT Crane','Lead Source':'Reference','Lead Owner':'Amit Shah','Inquiry Status':'Won','Contact Person':'Rahul Kalyani','Quotation No':'QT-001','Expected Order Value':1850000,'Quotation Status':'Accepted','Order Loss Analysis':'','Remarks':'3T 15M Span'},
+  {Sr:2,Date:'2025-01-10',Company:'Usha Breco Ltd',Location:'Dhanbad',State:'Jharkhand','Product Type':'EOT Crane','Lead Source':'Exhibition','Lead Owner':'Amit Shah','Inquiry Status':'Lost','Contact Person':'S.K. Verma','Quotation No':'QT-003','Expected Order Value':3200000,'Quotation Status':'Rejected','Order Loss Analysis':'Price High','Remarks':'Competition'},
+  {Sr:3,Date:'2025-01-14',Company:'Kirloskar Brothers',Location:'Pune',State:'Maharashtra','Product Type':'Hoist','Lead Source':'Website','Lead Owner':'Priya Sharma','Inquiry Status':'Quotation Sent','Contact Person':'Ashok Kirloskar','Quotation No':'QT-004','Expected Order Value':285000,'Quotation Status':'Pending','Order Loss Analysis':'','Remarks':'1T Electric Hoist'},
+  {Sr:4,Date:'2025-01-18',Company:'Toyota Kirloskar',Location:'Bangalore',State:'Karnataka','Product Type':'EOT Crane','Lead Source':'Direct','Lead Owner':'Rajesh Nair','Inquiry Status':'Won','Contact Person':'Tanaka San','Quotation No':'QT-005','Expected Order Value':5800000,'Quotation Status':'Accepted','Order Loss Analysis':'','Remarks':'2x EOT 10T'},
+  {Sr:5,Date:'2025-01-25',Company:'Thermax Ltd',Location:'Pune',State:'Maharashtra','Product Type':'Gantry Crane','Lead Source':'LinkedIn','Lead Owner':'Priya Sharma','Inquiry Status':'Inquiry','Contact Person':'V.M. Dhyani','Quotation No':'','Expected Order Value':950000,'Quotation Status':'','Order Loss Analysis':'','Remarks':'Outdoor Gantry'},
+  {Sr:6,Date:'2025-02-01',Company:'CEAT Ltd',Location:'Mumbai',State:'Maharashtra','Product Type':'EOT Crane','Lead Source':'Reference','Lead Owner':'Amit Shah','Inquiry Status':'Won','Contact Person':'Arvind Goenka','Quotation No':'QT-008','Expected Order Value':1250000,'Quotation Status':'Accepted','Order Loss Analysis':'','Remarks':''},
+  {Sr:7,Date:'2025-02-08',Company:'Adani Ports',Location:'Ahmedabad',State:'Gujarat','Product Type':'EOT Crane','Lead Source':'Exhibition','Lead Owner':'Rajesh Nair','Inquiry Status':'Lost','Contact Person':'Kunal Shah','Quotation No':'QT-010','Expected Order Value':4200000,'Quotation Status':'Rejected','Order Loss Analysis':'Delivery Delay','Remarks':'Vendor changed'},
+  {Sr:8,Date:'2025-02-18',Company:'BHEL Hyderabad',Location:'Hyderabad',State:'Telangana','Product Type':'EOT Crane','Lead Source':'Reference','Lead Owner':'Rajesh Nair','Inquiry Status':'Won','Contact Person':'P. Reddy','Quotation No':'QT-013','Expected Order Value':1650000,'Quotation Status':'Accepted','Order Loss Analysis':'','Remarks':'Govt order'},
+  {Sr:9,Date:'2025-03-01',Company:'Havells India',Location:'Faridabad',State:'Haryana','Product Type':'Jib Crane','Lead Source':'Reference','Lead Owner':'Rajesh Nair','Inquiry Status':'Won','Contact Person':'Rajesh Gupta','Quotation No':'QT-015','Expected Order Value':380000,'Quotation Status':'Accepted','Order Loss Analysis':'','Remarks':'500 kg Jib'},
+  {Sr:10,Date:'2025-03-05',Company:'Larsen & Toubro',Location:'Mumbai',State:'Maharashtra','Product Type':'EOT Crane','Lead Source':'Existing','Lead Owner':'Amit Shah','Inquiry Status':'Won','Contact Person':'S.N. Subrahmanyan','Quotation No':'QT-016','Expected Order Value':3800000,'Quotation Status':'Accepted','Order Loss Analysis':'','Remarks':'Repeat order'},
+  {Sr:11,Date:'2025-04-01',Company:'JSW Steel',Location:'Nashik',State:'Maharashtra','Product Type':'EOT Crane','Lead Source':'Reference','Lead Owner':'Amit Shah','Inquiry Status':'Won','Contact Person':'Sanjeev Garg','Quotation No':'QT-021','Expected Order Value':1580000,'Quotation Status':'Accepted','Order Loss Analysis':'','Remarks':''},
+  {Sr:12,Date:'2025-04-24',Company:'Torrent Power',Location:'Vadodara',State:'Gujarat','Product Type':'EOT Crane','Lead Source':'Direct','Lead Owner':'Amit Shah','Inquiry Status':'Won','Contact Person':'Samir Mehta','Quotation No':'QT-027','Expected Order Value':8500000,'Quotation Status':'Accepted','Order Loss Analysis':'','Remarks':'3x Cranes'},
+  {Sr:13,Date:'2025-05-12',Company:'Nuvoco Vistas',Location:'Mumbai',State:'Maharashtra','Product Type':'LCS Crane','Lead Source':'Reference','Lead Owner':'Priya Sharma','Inquiry Status':'Won','Contact Person':'Jayesh Rathi','Quotation No':'QT-030','Expected Order Value':1260000,'Quotation Status':'Accepted','Order Loss Analysis':'','Remarks':''},
+  {Sr:14,Date:'2025-05-24',Company:'GSFC Ltd',Location:'Vadodara',State:'Gujarat','Product Type':'EOT Crane','Lead Source':'Govt Tender','Lead Owner':'Priya Sharma','Inquiry Status':'Won','Contact Person':'H.B. Patel','Quotation No':'QT-032','Expected Order Value':2100000,'Quotation Status':'Accepted','Order Loss Analysis':'','Remarks':''},
+  {Sr:15,Date:'2025-06-21',Company:'NTPC Ltd',Location:'Lucknow',State:'Uttar Pradesh','Product Type':'EOT Crane','Lead Source':'Reference','Lead Owner':'Rajesh Nair','Inquiry Status':'Won','Contact Person':'R.K. Singh','Quotation No':'QT-038','Expected Order Value':4800000,'Quotation Status':'Accepted','Order Loss Analysis':'','Remarks':'PSU order'},
+  {Sr:16,Date:'2025-07-03',Company:'Bajaj Electricals',Location:'Pune',State:'Maharashtra','Product Type':'Hoist','Lead Source':'Website','Lead Owner':'Priya Sharma','Inquiry Status':'Quotation Sent','Contact Person':'Anuj Poddar','Quotation No':'QT-042','Expected Order Value':420000,'Quotation Status':'Pending','Order Loss Analysis':'','Remarks':''},
+  {Sr:17,Date:'2025-07-14',Company:'Vedanta Ltd',Location:'Talcher',State:'Odisha','Product Type':'EOT Crane','Lead Source':'Reference','Lead Owner':'Rajesh Nair','Inquiry Status':'Lost','Contact Person':'Anil Agarwal Jr','Quotation No':'QT-044','Expected Order Value':6500000,'Quotation Status':'Rejected','Order Loss Analysis':'Price High','Remarks':'Korean vendor selected'},
+  {Sr:18,Date:'2025-08-01',Company:'Siemens India',Location:'Pune',State:'Maharashtra','Product Type':'EOT Crane','Lead Source':'Direct','Lead Owner':'Amit Shah','Inquiry Status':'Quotation Sent','Contact Person':'Suresh Prabhu','Quotation No':'QT-049','Expected Order Value':2200000,'Quotation Status':'Under Review','Order Loss Analysis':'','Remarks':''}
+];
+
+let allLeads = [], filteredLeads = [], page = 0;
+const PAGE_SZ = 15;
+
+function statusBadge(s) {
+  s = (s||'').trim();
+  if (/won|accepted|confirmed/i.test(s)) return `<span class="badge b-won">✅ ${s}</span>`;
+  if (/lost|rejected/i.test(s)) return `<span class="badge b-lost">❌ ${s}</span>`;
+  if (/quotation sent|sent/i.test(s)) return `<span class="badge b-quot">📄 ${s}</span>`;
+  if (/inquiry/i.test(s)) return `<span class="badge b-inq">🔵 ${s}</span>`;
+  if (/progress|review/i.test(s)) return `<span class="badge b-prog">🔄 ${s}</span>`;
+  if (/pending/i.test(s)) return `<span class="badge b-pend">⏳ ${s}</span>`;
+  return `<span class="badge" style="background:rgba(100,116,139,.1);color:var(--txt2)">${s||'—'}</span>`;
+}
+
+function populateFilters(leads) {
+  const unique = key => [...new Set(leads.map(l=>l[key]).filter(Boolean))].sort();
+  [['fState','State'],['fProd','Product Type'],['fOwner','Lead Owner'],['fSrc','Lead Source'],['fStatus','Inquiry Status']].forEach(([id,key])=>{
+    const sel = document.getElementById(id);
+    const cur = sel.value;
+    sel.innerHTML = `<option value="">All</option>` + unique(key).map(v=>`<option value="${v}" ${v===cur?'selected':''}>${v}</option>`).join('');
+  });
+}
+
+function applyFilters() {
+  const from   = document.getElementById('fFrom').value;
+  const to     = document.getElementById('fTo').value;
+  const state  = document.getElementById('fState').value;
+  const prod   = document.getElementById('fProd').value;
+  const owner  = document.getElementById('fOwner').value;
+  const src    = document.getElementById('fSrc').value;
+  const status = document.getElementById('fStatus').value;
+  const q      = (document.getElementById('tblSearch').value||'').toLowerCase();
+
+  filteredLeads = allLeads.filter(l => {
+    if (from && l.Date < from) return false;
+    if (to   && l.Date > to)   return false;
+    if (state  && l['State'] !== state) return false;
+    if (prod   && l['Product Type'] !== prod) return false;
+    if (owner  && l['Lead Owner'] !== owner) return false;
+    if (src    && l['Lead Source'] !== src) return false;
+    if (status && l['Inquiry Status'] !== status) return false;
+    if (q && !JSON.stringify(l).toLowerCase().includes(q)) return false;
+    return true;
+  });
+  page = 0;
+  renderTable();
+  renderCharts();
+}
+
+function resetFilters() {
+  ['fFrom','fTo','tblSearch'].forEach(id => document.getElementById(id).value = '');
+  ['fState','fProd','fOwner','fSrc','fStatus'].forEach(id => document.getElementById(id).value = '');
+  filteredLeads = [...allLeads];
+  page = 0;
+  renderTable();
+  renderCharts();
+}
+
+function searchTable() { applyFilters(); }
+
+function renderTable() {
+  const start = page * PAGE_SZ;
+  const rows = filteredLeads.slice(start, start + PAGE_SZ);
+  setV('tblCount', `Showing ${start+1}–${Math.min(start+PAGE_SZ,filteredLeads.length)} of ${filteredLeads.length} records`);
+  document.getElementById('leadsBody').innerHTML = rows.map(l => `
+    <tr>
+      <td style="color:var(--txt3);font-family:var(--mono)">${l['Sr']||'—'}</td>
+      <td style="font-family:var(--mono);font-size:.72rem">${l['Date']||'—'}</td>
+      <td><b>${l['Company Name']||l['Company']||'—'}</b></td>
+      <td style="color:var(--txt2)">${l['Location']||'—'}</td>
+      <td>${l['State']||'—'}</td>
+      <td><span style="background:rgba(59,130,246,.1);color:var(--blue);padding:2px 7px;border-radius:4px;font-size:.72rem">${l['Product Type']||'—'}</span></td>
+      <td style="color:var(--txt2)">${l['Contact Person']||'—'}</td>
+      <td>${l['Lead Owner']||'—'}</td>
+      <td><span style="color:var(--txt2);font-size:.75rem">${l['Lead Source']||'—'}</span></td>
+      <td style="font-family:var(--mono);font-size:.72rem;color:var(--txt3)">${l['Quotation No']||'—'}</td>
+      <td style="font-family:var(--mono);font-weight:700;color:var(--txt)">${l['Expected Order Value']?fmtINR(l['Expected Order Value']):'—'}</td>
+      <td>${statusBadge(l['Inquiry Status'])}</td>
+      <td style="color:var(--txt3);font-size:.75rem;max-width:160px;overflow:hidden;text-overflow:ellipsis">${l['Remarks']||'—'}</td>
+    </tr>`).join('');
+  document.getElementById('btnPrev').disabled = page === 0;
+  document.getElementById('btnNext').disabled = start + PAGE_SZ >= filteredLeads.length;
+  setV('pageInfo', `Page ${page+1} of ${Math.max(1,Math.ceil(filteredLeads.length/PAGE_SZ))}`);
+}
+
+function changePage(d) { page = Math.max(0, Math.min(page+d, Math.ceil(filteredLeads.length/PAGE_SZ)-1)); renderTable(); }
+
+function renderCharts() {
+  const leads = filteredLeads;
+  const O = getChartOpts();
+  const won  = leads.filter(l => /won|accepted|confirmed/i.test(l['Inquiry Status']||''));
+  const lost = leads.filter(l => /lost|rejected/i.test(l['Inquiry Status']||''));
+  const quots= leads.filter(l => l['Quotation No']&&String(l['Quotation No']).trim());
+  const rev  = leads.reduce((s,l)=>s+parseVal(l['Expected Order Value']),0);
+  const wonRev=won.reduce((s,l)=>s+parseVal(l['Expected Order Value']),0);
+
+  setV('vTotal', leads.length);
+  setV('vActive', leads.filter(l=>/inquiry|quotation|progress/i.test(l['Inquiry Status']||'')).length);
+  setV('vQuot',  quots.length);
+  setV('vWon',   won.length);
+  setV('vLost',  lost.length);
+  setV('vConv',  leads.length ? ((won.length/leads.length)*100).toFixed(1)+'%' : '0%');
+  setV('vRev',   fmtINR(rev));
+  setV('vWonRev',fmtINR(wonRev));
+
+  // Funnel
+  mkChart('cFunnel',{type:'bar',data:{labels:['Inquiry','Quotation','Won','Lost'],datasets:[{data:[leads.length,quots.length,won.length,lost.length],backgroundColor:['#6366f1','#3b82f6','#10b981','#ef4444'],borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:O.tt},scales:{x:{grid:{color:O.grid}},y:{grid:{color:O.grid},beginAtZero:true}}}});
+
+  // Source doughnut
+  const bySrc = groupBy(leads,'Lead Source');
+  mkChart('cSource',{type:'doughnut',data:{labels:Object.keys(bySrc),datasets:[{data:Object.values(bySrc),backgroundColor:MALGUDI.COLORS,borderWidth:2,borderColor:'transparent',hoverOffset:6}]},options:{cutout:'56%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:5,font:{size:10}}},tooltip:O.tt}}});
+
+  // Product revenue doughnut
+  const byProd = sumByKey(leads,'Product Type','Expected Order Value');
+  mkChart('cProduct',{type:'doughnut',data:{labels:Object.keys(byProd),datasets:[{data:Object.values(byProd),backgroundColor:MALGUDI.COLORS,borderWidth:2,borderColor:'transparent',hoverOffset:6}]},options:{cutout:'56%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:5,font:{size:10}}},tooltip:{...O.tt,callbacks:{label:c=>` ${c.label}: ${fmtINR(c.raw)}`}}}}});
+
+  // Monthly trend
+  const mLeads={},mQuots={},mWon={};
+  leads.forEach(l=>{
+    const k=monthKey(l['Date']); if(!k) return;
+    mLeads[k]=(mLeads[k]||0)+1;
+    if(l['Quotation No']&&String(l['Quotation No']).trim()) mQuots[k]=(mQuots[k]||0)+1;
+    if(/won|accepted/i.test(l['Inquiry Status']||'')) mWon[k]=(mWon[k]||0)+1;
+  });
+  const mAll=sortMonths(mLeads); const lbs=Object.keys(mAll);
+  mkChart('cTrend',{type:'line',data:{labels:lbs,datasets:[
+    {label:'Leads',data:lbs.map(k=>mLeads[k]||0),borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,.08)',fill:true,tension:.4,pointRadius:4,borderWidth:2},
+    {label:'Quotations',data:lbs.map(k=>mQuots[k]||0),borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.06)',fill:true,tension:.4,pointRadius:4,borderWidth:2},
+    {label:'Won',data:lbs.map(k=>mWon[k]||0),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.06)',fill:true,tension:.4,pointRadius:4,borderWidth:2}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:O.tt,legend:{labels:{boxWidth:10,padding:10,font:{size:11}}}},scales:{x:{grid:{color:O.grid}},y:{grid:{color:O.grid},beginAtZero:true}}}});
+
+  // State bar (horizontal)
+  const bySt=groupBy(leads,'State');
+  const stSorted=Object.entries(bySt).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  mkChart('cState',{type:'bar',data:{labels:stSorted.map(e=>e[0]),datasets:[{label:'Leads',data:stSorted.map(e=>e[1]),backgroundColor:MALGUDI.COLORS,borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:O.tt},scales:{x:{grid:{color:O.grid},beginAtZero:true},y:{grid:{color:O.grid}}}}});
+
+  // Owner performance
+  const owners=[...new Set(leads.map(l=>l['Lead Owner']).filter(Boolean))];
+  mkChart('cOwner',{type:'bar',data:{labels:owners,datasets:[
+    {label:'Leads',data:owners.map(o=>leads.filter(l=>l['Lead Owner']===o).length),backgroundColor:'rgba(99,102,241,.7)',borderRadius:6},
+    {label:'Won',data:owners.map(o=>won.filter(l=>l['Lead Owner']===o).length),backgroundColor:'rgba(16,185,129,.7)',borderRadius:6}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:O.tt,legend:{labels:{boxWidth:8,padding:8,font:{size:11}}}},scales:{x:{grid:{color:O.grid}},y:{grid:{color:O.grid},beginAtZero:true}}}});
+
+  // Loss analysis
+  const lossMap=groupBy(lost.filter(l=>l['Order Loss Analysis']),'Order Loss Analysis');
+  mkChart('cLoss',{type:'doughnut',data:{labels:Object.keys(lossMap).length?Object.keys(lossMap):['No Loss Data'],datasets:[{data:Object.values(lossMap).length?Object.values(lossMap):[1],backgroundColor:['#ef4444','#f97316','#f59e0b','#a855f7','#6366f1'],borderWidth:2,borderColor:'transparent',hoverOffset:6}]},options:{cutout:'56%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:6,font:{size:10}}},tooltip:O.tt}}});
+
+  // Revenue by state
+  const revBySt=sumByKey(leads,'State','Expected Order Value');
+  const revStSorted=Object.entries(revBySt).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  mkChart('cRevState',{type:'bar',data:{labels:revStSorted.map(e=>e[0]),datasets:[{label:'Revenue',data:revStSorted.map(e=>e[1]),backgroundColor:MALGUDI.COLORS,borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...O.tt,callbacks:{label:c=>' '+fmtINR(c.raw)}}},scales:{x:{grid:{color:O.grid},ticks:{callback:v=>fmtINR(v)}},y:{grid:{color:O.grid}}}}});
+}
+
+function redrawCharts() { renderCharts(); }
+
+async function loadData() {
+  const resp = await fetchData('leads','limit=2000');
+  const src  = resp ? (resp.source || 'api') : 'sample';
+  allLeads   = (resp && resp.data) ? resp.data : SAMPLE;
+  filteredLeads = [...allLeads];
+  updateSyncStatus(src);
+  populateFilters(allLeads);
+  renderTable();
+  renderCharts();
+  setV('lastSync', 'Synced: '+new Date().toLocaleTimeString());
+}
+
+function exportLeads() {
+  if (typeof XLSX === 'undefined') { alert('Export library not loaded'); return; }
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet(filteredLeads);
+  XLSX.utils.book_append_sheet(wb, ws, 'Leads');
+  XLSX.writeFile(wb, `MalgudiLeads_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
+
+loadData();
+startCountdown(30, c => setV('cdown', c), loadData);
+</script>
+</body>
+</html>

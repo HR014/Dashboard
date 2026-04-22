@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Accounts</title>
+<link rel="stylesheet" href="shared/style.css">
+<script src="shared/nav.js"></script>
+<script src="shared/api.js"></script>
+</head>
+<body>
+<header><nav id="mainNav"></nav></header>
+<script>
+buildNav('accounts');
+async function load(){
+const res = await fetchData("leads");
+const total = res.data.reduce((s,d)=> s + (parseFloat(d["Expected Order Value"])||0),0);
+console.log("Revenue:", total);
+}
+load();
+</script>
+</body>
+</html>

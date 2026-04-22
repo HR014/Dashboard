@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<title>Leads</title>
+
+<link rel="stylesheet" href="shared/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="shared/nav.js"></script>
+</head>
+
+<body>
+
+<header class="header">
+  <div class="hdr-brand">
+    <div class="hdr-logo">📋</div>
+    <div>
+      <div class="hdr-name">Lead Tracker</div>
+      <div class="hdr-sub">Live Lead Data</div>
+    </div>
+  </div>
+  <nav class="hdr-nav" id="mainNav"></nav>
+</header>
+
+<main class="main">
+
+<!-- KPI -->
+<div class="kpi-grid">
+  <div class="kpi-card span2">
+    <div class="kpi-lbl">Total Leads</div>
+    <div class="kpi-val" id="k1">0</div>
+  </div>
+
+  <div class="kpi-card span2">
+    <div class="kpi-lbl">Converted</div>
+    <div class="kpi-val" id="k2">0</div>
+  </div>
+
+  <div class="kpi-card span2">
+    <div class="kpi-lbl">Conversion %</div>
+    <div class="kpi-val" id="k3">0%</div>
+  </div>
+</div>
+
+<!-- CHART -->
+<div class="card">
+  <div class="card-title">Lead Source</div>
+  <canvas id="c1"></canvas>
+</div>
+
+</main>
+
+<script>
+
+initTheme();
+buildNav('leads');
+
+async function load(){
+
+const res = await fetchData('leads');
+if(!res) return;
+
+const data = res.data;
+
+// KPI
+setV('k1', data.length);
+
+const won = data.filter(d=>d["Quotation Status"]==="Accepted").length;
+setV('k2', won);
+
+setV('k3', ((won/data.length)*100).toFixed(1)+"%");
+
+// Chart
+const grp = groupBy(data,"Lead Source");
+
+mkChart('c1',{
+type:'pie',
+data:{
+labels:Object.keys(grp),
+datasets:[{data:Object.values(grp)}]
+}
+});
+
+}
+
+load();
+
+</script>
+
+</body>
+</html>

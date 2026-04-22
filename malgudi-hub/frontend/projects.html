@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projects — Malgudi BI Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<script src="shared/nav.js"></script><script>initTheme();</script>
+<header class="header">
+  <div class="hdr-brand"><div class="hdr-logo">🔧</div><div><div class="hdr-name">Project Tracker</div><div class="hdr-sub">Pipeline & Delivery Status</div></div></div>
+  <nav class="hdr-nav" id="mainNav"></nav>
+  <div class="hdr-right">
+    <div class="refresh-bar"><span class="pulse"></span><span id="cdown">30</span>s</div>
+    <button class="btn-sm" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+    <div class="user-pill" onclick="doLogout()"><div class="user-av" id="userAv">A</div><span id="userNm">admin</span></div>
+  </div>
+</header>
+<main class="main">
+<div class="kpi-grid">
+  <div class="kpi-card" style="--kc:#f59e0b"><div class="kpi-ico">🔧</div><div class="kpi-lbl">Active Projects</div><div class="kpi-val">12</div><div class="kpi-sub">In progress</div></div>
+  <div class="kpi-card" style="--kc:#10b981"><div class="kpi-ico">✅</div><div class="kpi-lbl">Delivered</div><div class="kpi-val">8</div><div class="kpi-sub">FY 2025–26</div></div>
+  <div class="kpi-card" style="--kc:#ef4444"><div class="kpi-ico">⚠️</div><div class="kpi-lbl">Delayed</div><div class="kpi-val">3</div><div class="kpi-sub">Past due date</div></div>
+  <div class="kpi-card" style="--kc:#3b82f6"><div class="kpi-ico">📅</div><div class="kpi-lbl">This Month</div><div class="kpi-val">4</div><div class="kpi-sub">Scheduled delivery</div></div>
+  <div class="kpi-card" style="--kc:#a855f7"><div class="kpi-ico">💰</div><div class="kpi-lbl">Order Book Value</div><div class="kpi-val">₹3.8 Cr</div><div class="kpi-sub">Active projects</div></div>
+</div>
+<div class="row row-2">
+  <div class="card"><div class="card-hdr"><div class="card-title">Project Status Distribution</div><div class="card-sub">Current pipeline breakdown</div></div><canvas id="cProjStatus" height="240"></canvas></div>
+  <div class="card"><div class="card-hdr"><div class="card-title">Monthly Deliveries</div><div class="card-sub">Projects delivered per month</div></div><canvas id="cProjDel" height="240"></canvas></div>
+</div>
+<!-- PROJECTS TABLE -->
+<div class="tbl-card">
+  <div class="tbl-top"><div><div style="font-weight:700;font-size:.88rem">Active Projects</div><div style="font-size:.7rem;color:var(--txt3)">Live project tracking</div></div></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Project</th><th>Client</th><th>Type</th><th>Value</th><th>Start Date</th><th>Expected Delivery</th><th>Status</th><th>% Complete</th></tr></thead>
+      <tbody>
+        <tr><td style="font-family:var(--mono);color:var(--txt3)">P-001</td><td><b>10T EOT Crane</b></td><td>JSW Steel</td><td>EOT Crane</td><td style="font-family:var(--mono)">₹15.8L</td><td>2025-04-01</td><td>2025-07-30</td><td><span class="badge b-prog">🔄 In Progress</span></td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:80px;height:6px;background:var(--s3);border-radius:3px"><div style="width:75%;height:100%;background:#f59e0b;border-radius:3px"></div></div>75%</div></td></tr>
+        <tr><td style="font-family:var(--mono);color:var(--txt3)">P-002</td><td><b>2x EOT 5T Cranes</b></td><td>Toyota Kirloskar</td><td>EOT Crane</td><td style="font-family:var(--mono)">₹58.0L</td><td>2025-02-15</td><td>2025-06-30</td><td><span class="badge b-high">⚠️ Delayed</span></td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:80px;height:6px;background:var(--s3);border-radius:3px"><div style="width:60%;height:100%;background:#ef4444;border-radius:3px"></div></div>60%</div></td></tr>
+        <tr><td style="font-family:var(--mono);color:var(--txt3)">P-003</td><td><b>Gantry Crane 15T</b></td><td>Torrent Power</td><td>Gantry</td><td style="font-family:var(--mono)">₹85.0L</td><td>2025-05-01</td><td>2025-09-30</td><td><span class="badge b-prog">🔄 In Progress</span></td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:80px;height:6px;background:var(--s3);border-radius:3px"><div style="width:40%;height:100%;background:#3b82f6;border-radius:3px"></div></div>40%</div></td></tr>
+        <tr><td style="font-family:var(--mono);color:var(--txt3)">P-004</td><td><b>Jib Crane 500kg</b></td><td>Havells India</td><td>Jib</td><td style="font-family:var(--mono)">₹3.8L</td><td>2025-06-10</td><td>2025-07-25</td><td><span class="badge b-done">✅ Dispatched</span></td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:80px;height:6px;background:var(--s3);border-radius:3px"><div style="width:95%;height:100%;background:#10b981;border-radius:3px"></div></div>95%</div></td></tr>
+        <tr><td style="font-family:var(--mono);color:var(--txt3)">P-005</td><td><b>EOT Crane 20T</b></td><td>NTPC Ltd</td><td>EOT Crane</td><td style="font-family:var(--mono)">₹48.0L</td><td>2025-07-01</td><td>2025-11-30</td><td><span class="badge b-inq">🔵 Design Phase</span></td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:80px;height:6px;background:var(--s3);border-radius:3px"><div style="width:20%;height:100%;background:#6366f1;border-radius:3px"></div></div>20%</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div style="text-align:center;padding:12px;color:var(--txt3);font-size:.75rem;font-family:var(--mono)">📋 Connect Projects sheet to Google Sheets for live data · <a href="shared/nav.js" style="color:var(--blue)">Configure</a></div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+buildNav('projects');
+const O = getChartOpts();
+mkChart('cProjStatus',{type:'doughnut',data:{labels:['In Progress','Design Phase','Dispatched','Delayed','On Hold'],datasets:[{data:[7,3,2,3,1],backgroundColor:['#3b82f6','#a855f7','#10b981','#ef4444','#f59e0b'],borderWidth:2,borderColor:'transparent',hoverOffset:6}]},options:{cutout:'56%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:6,font:{size:11}}},tooltip:O.tt}}});
+mkChart('cProjDel',{type:'bar',data:{labels:['Apr','May','Jun','Jul','Aug','Sep'],datasets:[{label:'Delivered',data:[1,2,1,2,1,1],backgroundColor:'rgba(16,185,129,.7)',borderRadius:8},{label:'Delayed',data:[0,1,0,1,1,0],backgroundColor:'rgba(239,68,68,.5)',borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:O.tt,legend:{labels:{boxWidth:8,padding:10,font:{size:11}}}},scales:{x:{grid:{color:O.grid}},y:{grid:{color:O.grid},beginAtZero:true,ticks:{stepSize:1}}}}});
+startCountdown(30, c => setV('cdown',c), ()=>{});
+</script>
+</body></html>
