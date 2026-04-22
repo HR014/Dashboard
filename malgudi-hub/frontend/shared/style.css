@@ -174,5 +174,52 @@ tr:last-child td{border-bottom:none;}
 [data-theme="light"] .fg select option{background:#fff;color:#0f172a;}
 
 /* RESPONSIVE */
-@media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(4,1fr);}.row-3{grid-template-columns:repeat(2,1fr);}.row-21,.row-12{grid-template-columns:1fr;}}
-@media(max-width:768px){.kpi-grid{grid-template-columns:repeat(2,1fr);}.row-2{grid-template-columns:1fr;}.hdr-nav{display:none;}.main{padding:14px;}.header{padding:0 14px;}}
+@media(max-width:1200px){
+  .header,.filter-bar{padding-left:20px;padding-right:20px;}
+  .main{padding:18px 20px;}
+  .kpi-grid{grid-template-columns:repeat(4,1fr);}
+  .row-3{grid-template-columns:repeat(2,1fr);}
+  .row-21,.row-12{grid-template-columns:1fr;}
+  .tbl-search{width:220px;}
+}
+@media(max-width:900px){
+  .header{height:auto;min-height:62px;padding-top:10px;padding-bottom:10px;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+  .hdr-right{width:100%;justify-content:flex-end;flex-wrap:wrap;}
+  .filter-bar{padding:10px 20px;align-items:stretch;}
+  .fg{flex:1 1 160px;}
+  .fg input,.fg select{min-width:0;width:100%;}
+  .btn-rst{align-self:stretch;}
+  .tbl-top{gap:12px;align-items:flex-start;flex-wrap:wrap;}
+  .tbl-search{width:100%;max-width:320px;}
+  .card{padding:16px 18px;}
+}
+@media(max-width:768px){
+  .hdr-nav{display:none;}
+  .header,.filter-bar{padding-left:14px;padding-right:14px;}
+  .main{padding:14px;}
+  .hdr-brand{min-width:0;}
+  .hdr-right{justify-content:flex-start;}
+  .btn-sm{padding:7px 10px;}
+  .user-pill{padding-right:10px;}
+  .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .span2,.span3{grid-column:span 2;}
+  .row-2,.row-3,.row-21,.row-12{grid-template-columns:1fr;}
+  .tbl-pag{gap:10px;flex-wrap:wrap;}
+  .sec-title{letter-spacing:1px;}
+}
+@media(max-width:560px){
+  .header{gap:10px;}
+  .hdr-name{font-size:.88rem;}
+  .hdr-sub,.refresh-bar,.user-nm{display:none;}
+  .hdr-right{gap:6px;}
+  .btn-sm{font-size:.74rem;}
+  .kpi-grid{grid-template-columns:1fr;}
+  .span2,.span3{grid-column:auto;}
+  .kpi-card,.card{padding:15px;}
+  .kpi-val{font-size:1.3rem;}
+  .filter-bar{gap:10px;}
+  .fg{flex-basis:100%;}
+  .tbl-top{padding:12px 14px;}
+  .tbl-pag{justify-content:space-between;padding:12px 14px;}
+  .btn-pg{flex:1 1 120px;}
+}

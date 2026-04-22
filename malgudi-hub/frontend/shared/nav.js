@@ -172,10 +172,34 @@ function startCountdown(seconds, onTick, onRefresh) {
   return setInterval(()=>{ count--; onTick(count); if(count<=0){ count=seconds; onRefresh(); } }, 1000);
 }
 const CH = {};
+function ensureChartBox(el, baseHeight) {
+  let box = el.parentElement;
+  if (!box || !box.classList.contains('chart-box')) {
+    box = document.createElement('div');
+    box.className = 'chart-box';
+    el.parentNode.insertBefore(box, el);
+    box.appendChild(el);
+  }
+  box.style.position = 'relative';
+  box.style.width = '100%';
+  box.style.height = `${baseHeight}px`;
+  box.style.minHeight = `${baseHeight}px`;
+  return box;
+}
 function mkChart(id, cfg) {
   if (CH[id]) { CH[id].destroy(); delete CH[id]; }
   const el = document.getElementById(id);
   if (!el) return;
+  const baseHeight = parseInt(el.getAttribute('height') || '220', 10);
+  ensureChartBox(el, baseHeight);
+  el.removeAttribute('height');
+  el.style.display = 'block';
+  el.style.position = 'absolute';
+  el.style.inset = '0';
+  el.style.width = '100%';
+  el.style.height = '100%';
+  el.style.maxWidth = '100%';
+  el.style.maxHeight = '100%';
   CH[id] = new Chart(el, cfg);
   return CH[id];
 }
