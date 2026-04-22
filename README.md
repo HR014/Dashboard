@@ -1,162 +1,249 @@
 # 🏗️ Malgudi Cranes & Equipments — Dashboard Collection
 
-[![Node.js](https://img.shields.io/badge/Node.js-v18+-3C873A?style=flat&logo=node.js)](https://nodejs.org)
-[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5)](https://html5.org)
-[![Chart.js](https://img.shields.io/badge/Chart.js-4.4-FF6384?style=flat&logo=chart.js&logoColor=white)](https://chartjs.org)
+[![Node.js](https://img.shields.io/badge/Node.js-v18+-3C873A?style=flat\&logo=node.js)](https://nodejs.org)
+[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat\&logo=html5)](https://html5.org)
+[![Chart.js](https://img.shields.io/badge/Chart.js-4.4-FF6384?style=flat\&logo=chart.js\&logoColor=white)](https://chartjs.org)
 
-**Production-ready BI dashboards** for **Lead Tracking, Sales Analytics, Projects, Services** at Malgudi Cranes. Built for office LAN sharing (zero cloud costs). Supports **Excel drops** or **Google Sheets live sync**.
+Production-ready **Business Intelligence dashboards** for **Lead Tracking, Sales Analytics, Projects, and Services** at Malgudi Cranes.
+
+Built for **office LAN usage (zero cloud cost)** with support for:
+
+* Excel-based data
+* Google Sheets live sync
+
+---
 
 ## 📁 Repo Structure
 
 ```
 Dashboard/
-├── dashboard using excel/           ← LeadFlow Dashboard (full-stack)
-│   ├── backend/ (Node+Excel API)
-│   └── frontend/ (charts, auth, filters)
-├── Malgudi Sales Dashboard/        ← Single-file HTML (Google Sheets)
+├── dashboard using excel/           # LeadFlow Dashboard (Full Stack)
+│   ├── backend/ (Node + Excel API)
+│   └── frontend/ (UI + Charts)
+├── Malgudi Sales Dashboard/        # Standalone HTML Dashboard
 │   └── MCE_MA_Sales_Dashboard.html
-└── malgudi-hub/                    ← BI Hub v2.0 (6 dashboards)
-    ├── backend/ (unified Node server)
-    └── frontend/ (leads/sales/projects/services/design/accounts)
-├── README.md                       ← You're reading it!
-└── TODO.md                         ← Progress tracking
+├── malgudi-hub/                    # BI Hub (6 Dashboards)
+│   ├── backend/
+│   └── frontend/
+├── README.md
 ```
 
-## 🚀 Quick Start Guide
+---
 
-### Option 1: malgudi-hub (Recommended — All-in-One)
-```bash
-cd \"c:/Users/harsh/Projects/Dashboard/malgudi-hub/backend\"
+## 🚀 Quick Start
+
+### 🔹 Option 1: malgudi-hub (Recommended)
+
+```
+cd malgudi-hub/backend
 npm install
 node server.js
 ```
-**Open**: http://localhost:3000  
-**Login**: admin/admin123 | manager/manager456
 
-<details>
-<summary>📊 All 6 Dashboards unlocked → Click to expand</summary>
+Open: http://localhost:3000
+Login:
 
-| Dashboard | URL | Data Source | Key Features |
-|-----------|-----|-------------|--------------|
-| **Home** | `/` | - | Hero overview |
-| **Leads** | `/leads.html` | Excel/Google Sheets | Funnel, KPI, loss analysis |
-| **Sales** | `/sales.html` | Sales.xlsx | Revenue trends |
-| **Projects** | `/projects.html` | Projects.xlsx | Timeline, status |
-| **Services** | `/services.html` | Services.xlsx | AMC renewals |
-| **Design** | `/design.html` | Design.xlsx | Jobs pipeline |
-| **Accounts** | `/accounts.html` | Accounts.xlsx | Invoicing, payments |
+* admin / admin123
+* manager / manager456
 
-</details>
+---
 
-### Option 2: Standalone Sales Dashboard (Zero Setup)
-```bash
-# Windows
-start \"c:/Users/harsh/Projects/Dashboard/Malgudi Sales Dashboard/MCE_MA_Sales_Dashboard.html\"
+### 🔹 Option 2: Standalone Sales Dashboard
+
 ```
-**Live data**: Google Sheet auto-loads (revenue, GST, targets, MCE/MA split).
+Open: Malgudi Sales Dashboard/MCE_MA_Sales_Dashboard.html
+```
 
-### Option 3: LeadFlow Dashboard
-```bash
-cd \"c:/Users/harsh/Projects/Dashboard/dashboard using excel/backend\"
+✔ No setup required
+✔ Uses Google Sheets live data
+
+---
+
+### 🔹 Option 3: LeadFlow Dashboard
+
+```
+cd dashboard using excel/backend
 npm install
 node server.js
 ```
-**Open**: http://localhost:3000  
-**Drop Excel**: `backend/data/Lead Tracker.xlsx`
 
-## 🎯 Project Comparison
+---
 
-| Project | Tech | Backend | Live Data | Multi-User | Dashboards | Setup Time |
-|---------|------|---------|-----------|------------|------------|------------|
-| **malgudi-hub** | Node+HTML+Chart.js | ✅ Node API | Excel/Sheets | ✅ Auth+LAN | **6** | 5 min |
-| **LeadFlow** | Node+HTML+Chart.js | ✅ Node API | **Excel** | ✅ Auth | **1** (Leads) | 3 min |
-| **Sales HTML** | HTML+Chart.js | ❌ None | **Google Sheets** | ❌ None | **1** (Sales) | **0 min** |
+## 📊 Features
 
-## 🔌 Data Sources & Integration
+* Interactive Charts (Chart.js)
+* Excel + Google Sheets Integration
+* Live Filters (Date, State, Product, etc.)
+* Responsive UI
+* LAN Sharing Support
+* Export to Excel/CSV
+* Dark/Light Theme
 
-### Excel (All Projects)
-1. Drop `.xlsx` in `backend/data/`
-2. Sheet name: `Lead Tracker` (or first sheet)
-3. Restart server → **Auto-parsed to JSON API**
+---
 
-### Google Sheets (Live Sync)
-Update `frontend/shared/nav.js`:
+## 🔌 Data Integration
+
+### Excel
+
+* Place `.xlsx` inside:
+
+```
+backend/data/
+```
+
+### Google Sheets
+
+Update:
+
 ```js
-GSHEET_URL: 'https://docs.google.com/spreadsheets/d/YOUR_ID/export?format=csv',
-USE_GSHEETS: true
-```
-✅ Real-time updates, no restarts!
-
-## 🌐 Office LAN Sharing
-1. Run `ipconfig` → Note IPv4 (e.g., `192.168.1.105`)
-2. Share URL: `http://192.168.1.105:3000`
-3. Windows Firewall: Allow port 3000 (one-time)
-
-**Pro Tip**: Use PM2 for auto-restart:
-```bash
-npm i -g pm2
-pm2 start server.js --name malgudi-hub
+GSHEET_URL = "your-link"
 ```
 
-## ✨ Shared Features
-- 📊 **Interactive Charts** (Chart.js): Trends, funnels, pies, bars
-- 🔍 **Live Filters**: Date, state, product, owner, status
-- 🎨 **Themes**: Dark/Light (persists)
-- 📱 **Responsive**: Mobile → Ultra-wide
-- 🚀 **Performance**: <100ms updates
-- 💾 **Export**: Filtered data to Excel/CSV
+---
 
-## 🛠 Development & Customization
-```bash
-# Install deps (per backend)
-npm install
+## 🌐 LAN Usage
 
-# Dev mode (auto-reload)
-npm run dev
+1. Run:
 
-# Add Excel files to backend/data/
-# Update nav.js for Google Sheets URLs/users
+```
+ipconfig
 ```
 
-**Rebranding**: Edit CSS vars (`--accent: #your-color`).
+2. Use:
 
-## 📋 TODO Progress
-See [TODO.md](TODO.md)
+```
+http://YOUR-IP:3000
+```
 
-## 🤝 Contributing
-1. Add your Excel → Test dashboard
-2. Report issues in GitHub Discussions
-3. PRs welcome for new dashboards/metrics
+---
 
-## 🆘 Troubleshooting
-| Issue | Fix |
-|-------|-----|
-| `Cannot GET /leads.html` | Use full path or start correct server |
-| No data/charts | Verify Excel sheet name/columns |
-| Port busy | Change `PORT=4000` in server.js |
-| CORS/Sheets | Use `gviz/tq?tqx=out:csv` format |
-| npm missing | Install Node.js LTS |
+## 💻 Multi-PC Development Workflow
 
-## 📄 License
-**🎯 Use Case**
+### 🖥️ First Time Setup (New PC)
 
-This project is designed for:
+```
+git clone https://github.com/HR014/Dashboard.git
+cd Dashboard
+git checkout main
+git pull origin main
+```
 
-Sales teams
-Lead tracking systems
-Business analytics
-Excel-based reporting automation
+---
 
-## 👨‍💻Author
+### 🔁 Daily Workflow (Any PC)
+
+Before starting:
+
+```
+git pull origin main
+```
+
+After changes:
+
+```
+git add .
+git commit -m "update"
+git push origin main
+```
+
+---
+
+## 📁 Working on Specific Folder (Recommended)
+
+Example: Only working on `malgudi-hub`
+
+```
+git pull origin main
+
+# Make changes in malgudi-hub/
+
+git add malgudi-hub/
+git commit -m "Updated malgudi-hub"
+git push origin main
+```
+
+✔ Prevents unwanted file commits
+✔ Keeps repo clean
+
+---
+
+## 🔄 Switching Between PCs
+
+### PC1
+
+```
+git push origin main
+```
+
+### PC2
+
+```
+git pull origin main
+```
+
+Workflow:
+
+```
+PC1 → PUSH → PC2 → PULL
+PC2 → PUSH → PC1 → PULL
+```
+
+---
+
+## ⚠️ Rules to Follow
+
+* Always `git pull` before starting work
+* Always commit before switching PC
+* Avoid `git add .` unless needed
+* Resolve conflicts immediately
+
+---
+
+## 🚀 Advanced (Optional)
+
+Use feature branches:
+
+```
+git checkout -b feature-update
+git add malgudi-hub/
+git commit -m "feature update"
+git push origin feature-update
+```
+
+---
+
+## 🛠 Tech Stack
+
+* HTML, CSS, JavaScript
+* Node.js
+* Chart.js
+* Excel / Google Sheets
+
+---
+
+## 👨‍💻 Author
 
 **Harsh Raja**
-
 GitHub: https://github.com/HR014
 
-## ⭐ Future Improvements
-API integration
-Authentication system
-Advanced analytics (Power BI style)
-Database integration (MongoDB/MySQL)
+---
 
-**Built for sales excellence** 🚀
+## ⭐ Future Improvements
+
+* API Integration
+* Authentication Enhancements
+* Database Integration (MongoDB/MySQL)
+* Advanced Analytics
+
+---
+
+## 📌 Use Case
+
+* Sales Teams
+* Lead Management
+* Business Analytics
+* Excel Automation Systems
+
+---
+
+🚀 Built for real-world business usage
