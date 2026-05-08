@@ -23,9 +23,12 @@ Dashboard/
 ├── Malgudi Sales Dashboard/        # Standalone HTML Dashboard
 │   └── MCE_MA_Sales_Dashboard.html
 ├── malgudi-hub/                    # BI Hub (6 Dashboards)
-│   ├── backend/
-│   └── frontend/
+│   ├── backend/                 # Node.js API + Excel/JSON readers
+│   └── frontend/                # UI dashboards (leads/sales/projects/services/design/accounts)
+│
+│   → Includes the “Malgudi BI Hub” (login + dashboards) served on port 3000
 ├── README.md
+
 ```
 
 ---
