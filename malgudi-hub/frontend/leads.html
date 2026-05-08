@@ -40,6 +40,7 @@
   <div class="kpi-card" style="--kc:#6366f1"><div class="kpi-ico">📋</div><div class="kpi-lbl">Total Leads</div><div class="kpi-val" id="vTotal">—</div><div class="kpi-sub">FY 2025–26</div></div>
   <div class="kpi-card" style="--kc:#06b6d4"><div class="kpi-ico">🔥</div><div class="kpi-lbl">Active</div><div class="kpi-val" id="vActive">—</div><div class="kpi-sub">Open pipeline</div></div>
   <div class="kpi-card" style="--kc:#f59e0b"><div class="kpi-ico">📄</div><div class="kpi-lbl">Quotations</div><div class="kpi-val" id="vQuot">—</div><div class="kpi-sub">Generated</div></div>
+  <div class="kpi-card" style="--kc:#f97316"><div class="kpi-ico">📝</div><div class="kpi-lbl">Quotation Required</div><div class="kpi-val" id="vQuotReq">—</div><div class="kpi-sub">Pending quote</div></div>
   <div class="kpi-card" style="--kc:#10b981"><div class="kpi-ico">🏆</div><div class="kpi-lbl">Orders Won</div><div class="kpi-val" id="vWon">—</div><div class="kpi-sub" id="dWon">Confirmed</div></div>
   <div class="kpi-card" style="--kc:#ef4444"><div class="kpi-ico">❌</div><div class="kpi-lbl">Orders Lost</div><div class="kpi-val" id="vLost">—</div><div class="kpi-sub">Not converted</div></div>
   <div class="kpi-card" style="--kc:#a855f7"><div class="kpi-ico">📈</div><div class="kpi-lbl">Conversion %</div><div class="kpi-val" id="vConv">—</div><div class="kpi-sub">Won / Total</div></div>
@@ -51,27 +52,31 @@
 <div class="row row-3" style="margin-bottom:14px;">
   <div class="card">
     <div class="card-hdr"><div class="card-title">Sales Funnel</div><div class="card-sub">Inquiry → Quotation → Won/Lost</div></div>
-    <canvas id="cFunnel" height="220"></canvas>
+    <div class="chart-box h220"><canvas id="cFunnel"></canvas></div>
   </div>
   <div class="card">
     <div class="card-hdr"><div class="card-title">Leads by Source</div><div class="card-sub">Distribution by channel</div></div>
-    <canvas id="cSource" height="220"></canvas>
+    <div class="chart-box h220"><canvas id="cSource"></canvas></div>
   </div>
   <div class="card">
     <div class="card-hdr"><div class="card-title">Revenue by Product</div><div class="card-sub">Expected value breakdown</div></div>
-    <canvas id="cProduct" height="220"></canvas>
+    <div class="chart-box h220"><canvas id="cProduct"></canvas></div>
   </div>
 </div>
 
 <!-- TREND + STATE -->
-<div class="row row-21" style="margin-bottom:14px;">
+<div class="row row-3" style="margin-bottom:14px;">
   <div class="card">
     <div class="card-hdr"><div class="card-title">Monthly Lead Trend</div><div class="card-sub">Leads received vs Quotations vs Won</div></div>
-    <canvas id="cTrend" height="160"></canvas>
+    <div class="chart-box h160"><canvas id="cTrend"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="card-title">Monthly Quotation Shared</div><div class="card-sub">Quotes shared or sent by month</div></div>
+    <div class="chart-box h160"><canvas id="cQuotShared"></canvas></div>
   </div>
   <div class="card">
     <div class="card-hdr"><div class="card-title">Leads by State</div><div class="card-sub">Geographic distribution</div></div>
-    <canvas id="cState" height="260"></canvas>
+    <div class="chart-box h260"><canvas id="cState"></canvas></div>
   </div>
 </div>
 
@@ -79,15 +84,15 @@
 <div class="row row-3" style="margin-bottom:14px;">
   <div class="card">
     <div class="card-hdr"><div class="card-title">Salesperson Performance</div><div class="card-sub">Leads, Won & Conversion %</div></div>
-    <canvas id="cOwner" height="220"></canvas>
+    <div class="chart-box h220"><canvas id="cOwner"></canvas></div>
   </div>
   <div class="card">
     <div class="card-hdr"><div class="card-title">Order Loss Analysis</div><div class="card-sub">Root cause of lost deals</div></div>
-    <canvas id="cLoss" height="220"></canvas>
+    <div class="chart-box h220"><canvas id="cLoss"></canvas></div>
   </div>
   <div class="card">
     <div class="card-hdr"><div class="card-title">Revenue by State</div><div class="card-sub">Expected order value</div></div>
-    <canvas id="cRevState" height="220"></canvas>
+    <div class="chart-box h220"><canvas id="cRevState"></canvas></div>
   </div>
 </div>
 
@@ -98,7 +103,7 @@
     <input class="tbl-search" id="tblSearch" placeholder="🔍 Search company, contact, state..." oninput="searchTable()">
   </div>
   <div class="tbl-wrap">
-    <table><thead><tr><th>#</th><th>Date</th><th>Company</th><th>Location</th><th>State</th><th>Product</th><th>Contact</th><th>Owner</th><th>Source</th><th>Quot No</th><th>Order Value</th><th>Status</th><th>Remarks</th></tr></thead>
+    <table><thead><tr><th>Sr no</th><th>Date</th><th>Company Name</th><th>Location</th><th>Others</th><th>Product Type</th><th>Capacity / Specs</th><th>Phone</th><th>Email</th><th>Inquiry Status</th><th>Contact Person</th><th>Lead Source</th><th>Lead Owner</th><th>Quotation No</th><th>Quotation Date</th><th>Order Value</th><th>Quotation Status</th><th>Order Loss Analysis</th><th>Remarks</th></tr></thead>
     <tbody id="leadsBody"></tbody></table>
   </div>
   <div class="tbl-pag">
@@ -140,7 +145,7 @@ const PAGE_SZ = 15;
 
 function statusBadge(s) {
   s = (s||'').trim();
-  if (/won|accepted|confirmed/i.test(s)) return `<span class="badge b-won">✅ ${s}</span>`;
+  if (isWonStatus(s)) return `<span class="badge b-won">✅ ${s}</span>`;
   if (/lost|rejected/i.test(s)) return `<span class="badge b-lost">❌ ${s}</span>`;
   if (/quotation sent|sent/i.test(s)) return `<span class="badge b-quot">📄 ${s}</span>`;
   if (/inquiry/i.test(s)) return `<span class="badge b-inq">🔵 ${s}</span>`;
@@ -220,20 +225,68 @@ function renderTable() {
   setV('pageInfo', `Page ${page+1} of ${Math.max(1,Math.ceil(filteredLeads.length/PAGE_SZ))}`);
 }
 
+function renderTable() {
+  const dash = '-';
+  const start = page * PAGE_SZ;
+  const rows = filteredLeads.slice(start, start + PAGE_SZ);
+  const end = Math.min(start + PAGE_SZ, filteredLeads.length);
+  setV('tblCount', filteredLeads.length ? `Showing ${start+1}-${end} of ${filteredLeads.length} records` : 'No records found');
+  document.getElementById('leadsBody').innerHTML = rows.map(l => `
+    <tr>
+      <td style="color:var(--txt3);font-family:var(--mono)">${l['Sr']||dash}</td>
+      <td style="font-family:var(--mono);font-size:.72rem">${l['Date']||dash}</td>
+      <td><b>${l['Company Name']||l['Company']||dash}</b></td>
+      <td style="color:var(--txt2)">${l['Location']||dash}</td>
+      <td>${l['State']||l['States']||l['Others']||dash}</td>
+      <td><span style="background:rgba(59,130,246,.1);color:var(--blue);padding:2px 7px;border-radius:4px;font-size:.72rem">${l['Product Type']||dash}</span></td>
+      <td style="color:var(--txt2);max-width:220px;overflow:hidden;text-overflow:ellipsis">${l['Capacity / Specs']||dash}</td>
+      <td style="font-family:var(--mono);font-size:.72rem">${l['Phone']||dash}</td>
+      <td style="color:var(--blue);max-width:220px;overflow:hidden;text-overflow:ellipsis">${l['Email']||dash}</td>
+      <td>${statusBadge(l['Inquiry Status'])}</td>
+      <td style="color:var(--txt2)">${l['Contact Person']||dash}</td>
+      <td><span style="color:var(--txt2);font-size:.75rem">${l['Lead Source']||dash}</span></td>
+      <td>${l['Lead Owner']||dash}</td>
+      <td style="font-family:var(--mono);font-size:.72rem;color:var(--txt3)">${l['Quotation No']||dash}</td>
+      <td style="font-family:var(--mono);font-size:.72rem">${l['Quotation Date']||dash}</td>
+      <td style="font-family:var(--mono);font-weight:700;color:var(--txt)">${orderValue(l)?fmtINR(orderValue(l)):dash}</td>
+      <td style="color:var(--txt2)">${l['Quotation Status']||dash}</td>
+      <td style="color:var(--txt2)">${l['Order Loss Analysis']||dash}</td>
+      <td style="color:var(--txt3);font-size:.75rem;max-width:160px;overflow:hidden;text-overflow:ellipsis">${l['Remarks']||dash}</td>
+    </tr>`).join('');
+  document.getElementById('btnPrev').disabled = page === 0;
+  document.getElementById('btnNext').disabled = start + PAGE_SZ >= filteredLeads.length;
+  setV('pageInfo', `Page ${page+1} of ${Math.max(1,Math.ceil(filteredLeads.length/PAGE_SZ))}`);
+}
+
+function isWonStatus(s) { return /\bwin\b|\bwon\b|accepted|confirmed|po\s*received|po\s*recived/i.test(s||''); }
+function isLostStatus(s) { return /lost|rejected/i.test(s||''); }
+function isQuotationRequiredStatus(s) { return /quotation\s*req|quotation\s*required|quote\s*required|quote\s*req/i.test(s||''); }
+function isQuotationShared(l) { return /quotation\s*shared|quotation\s*sent|quote\s*shared|quote\s*sent/i.test(`${l['Inquiry Status']||''} ${l['Quotation Status']||''}`); }
+function orderValue(l) { return parseVal(l['Expected Order Value'] || l['Order Value']); }
+function sumOrderValueByKey(arr,key) {
+  return arr.reduce((a,i)=>{
+    const k=i[key]||'Unknown';
+    a[k]=(a[k]||0)+orderValue(i);
+    return a;
+  },{});
+}
+
 function changePage(d) { page = Math.max(0, Math.min(page+d, Math.ceil(filteredLeads.length/PAGE_SZ)-1)); renderTable(); }
 
 function renderCharts() {
   const leads = filteredLeads;
   const O = getChartOpts();
-  const won  = leads.filter(l => /won|accepted|confirmed/i.test(l['Inquiry Status']||''));
-  const lost = leads.filter(l => /lost|rejected/i.test(l['Inquiry Status']||''));
+  const won  = leads.filter(l => isWonStatus(l['Inquiry Status']));
+  const lost = leads.filter(l => isLostStatus(l['Inquiry Status']));
   const quots= leads.filter(l => l['Quotation No']&&String(l['Quotation No']).trim());
-  const rev  = leads.reduce((s,l)=>s+parseVal(l['Expected Order Value']),0);
-  const wonRev=won.reduce((s,l)=>s+parseVal(l['Expected Order Value']),0);
+  const quotReq = leads.filter(l => isQuotationRequiredStatus(l['Inquiry Status']));
+  const rev  = leads.reduce((s,l)=>s+orderValue(l),0);
+  const wonRev=won.reduce((s,l)=>s+orderValue(l),0);
 
   setV('vTotal', leads.length);
   setV('vActive', leads.filter(l=>/inquiry|quotation|progress/i.test(l['Inquiry Status']||'')).length);
   setV('vQuot',  quots.length);
+  setV('vQuotReq', quotReq.length);
   setV('vWon',   won.length);
   setV('vLost',  lost.length);
   setV('vConv',  leads.length ? ((won.length/leads.length)*100).toFixed(1)+'%' : '0%');
@@ -248,16 +301,17 @@ function renderCharts() {
   mkChart('cSource',{type:'doughnut',data:{labels:Object.keys(bySrc),datasets:[{data:Object.values(bySrc),backgroundColor:MALGUDI.COLORS,borderWidth:2,borderColor:'transparent',hoverOffset:6}]},options:{cutout:'56%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:5,font:{size:10}}},tooltip:O.tt}}});
 
   // Product revenue doughnut
-  const byProd = sumByKey(leads,'Product Type','Expected Order Value');
+  const byProd = sumOrderValueByKey(leads,'Product Type');
   mkChart('cProduct',{type:'doughnut',data:{labels:Object.keys(byProd),datasets:[{data:Object.values(byProd),backgroundColor:MALGUDI.COLORS,borderWidth:2,borderColor:'transparent',hoverOffset:6}]},options:{cutout:'56%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:5,font:{size:10}}},tooltip:{...O.tt,callbacks:{label:c=>` ${c.label}: ${fmtINR(c.raw)}`}}}}});
 
   // Monthly trend
-  const mLeads={},mQuots={},mWon={};
+  const mLeads={},mQuots={},mWon={},mQuotShared={};
   leads.forEach(l=>{
     const k=monthKey(l['Date']); if(!k) return;
     mLeads[k]=(mLeads[k]||0)+1;
     if(l['Quotation No']&&String(l['Quotation No']).trim()) mQuots[k]=(mQuots[k]||0)+1;
-    if(/won|accepted/i.test(l['Inquiry Status']||'')) mWon[k]=(mWon[k]||0)+1;
+    if(isWonStatus(l['Inquiry Status'])) mWon[k]=(mWon[k]||0)+1;
+    if(isQuotationShared(l)) mQuotShared[k]=(mQuotShared[k]||0)+1;
   });
   const mAll=sortMonths(mLeads); const lbs=Object.keys(mAll);
   mkChart('cTrend',{type:'line',data:{labels:lbs,datasets:[
@@ -265,6 +319,8 @@ function renderCharts() {
     {label:'Quotations',data:lbs.map(k=>mQuots[k]||0),borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.06)',fill:true,tension:.4,pointRadius:4,borderWidth:2},
     {label:'Won',data:lbs.map(k=>mWon[k]||0),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.06)',fill:true,tension:.4,pointRadius:4,borderWidth:2}
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:O.tt,legend:{labels:{boxWidth:10,padding:10,font:{size:11}}}},scales:{x:{grid:{color:O.grid}},y:{grid:{color:O.grid},beginAtZero:true}}}});
+
+  mkChart('cQuotShared',{type:'bar',data:{labels:lbs,datasets:[{label:'Quotation Shared',data:lbs.map(k=>mQuotShared[k]||0),backgroundColor:'rgba(249,115,22,.75)',borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:O.tt},scales:{x:{grid:{color:O.grid}},y:{grid:{color:O.grid},beginAtZero:true,ticks:{stepSize:1}}}}});
 
   // State bar (horizontal)
   const bySt=groupBy(leads,'State');
@@ -283,17 +339,23 @@ function renderCharts() {
   mkChart('cLoss',{type:'doughnut',data:{labels:Object.keys(lossMap).length?Object.keys(lossMap):['No Loss Data'],datasets:[{data:Object.values(lossMap).length?Object.values(lossMap):[1],backgroundColor:['#ef4444','#f97316','#f59e0b','#a855f7','#6366f1'],borderWidth:2,borderColor:'transparent',hoverOffset:6}]},options:{cutout:'56%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:6,font:{size:10}}},tooltip:O.tt}}});
 
   // Revenue by state
-  const revBySt=sumByKey(leads,'State','Expected Order Value');
+  const revBySt=sumOrderValueByKey(leads,'State');
   const revStSorted=Object.entries(revBySt).sort((a,b)=>b[1]-a[1]).slice(0,8);
   mkChart('cRevState',{type:'bar',data:{labels:revStSorted.map(e=>e[0]),datasets:[{label:'Revenue',data:revStSorted.map(e=>e[1]),backgroundColor:MALGUDI.COLORS,borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...O.tt,callbacks:{label:c=>' '+fmtINR(c.raw)}}},scales:{x:{grid:{color:O.grid},ticks:{callback:v=>fmtINR(v)}},y:{grid:{color:O.grid}}}}});
 }
 
 function redrawCharts() { renderCharts(); }
 
+function normalizePageLead(row) {
+  const state = row['State'] || row['States'] || row['Others'] || '';
+  const value = row['Expected Order Value'] || row['Order Value'] || '';
+  return { ...row, State: state, States: state, Others: state, 'Expected Order Value': value, 'Order Value': value };
+}
+
 async function loadData() {
   const resp = await fetchData('leads','limit=2000');
-  const src  = resp ? (resp.source || 'api') : 'sample';
-  allLeads   = (resp && resp.data) ? resp.data : SAMPLE;
+  const src  = resp ? (resp.sheetFallback ? 'api-fallback' : (resp.source || 'api')) : 'sample';
+  allLeads   = ((resp && resp.data) ? resp.data : SAMPLE).map(normalizePageLead);
   filteredLeads = [...allLeads];
   updateSyncStatus(src);
   populateFilters(allLeads);

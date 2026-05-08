@@ -98,10 +98,22 @@ button{cursor:pointer;font-family:var(--font);}
 .span2{grid-column:span 2;} .span3{grid-column:span 3;}
 
 /* ── CHART CARDS ── */
-.card{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r);padding:18px 20px;overflow:hidden;}
+.card{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r);padding:18px 20px;overflow:hidden;min-width:0;}
 .card-hdr{margin-bottom:14px;}
 .card-title{font-weight:700;font-size:.88rem;color:var(--txt);}
 .card-sub{font-size:.7rem;color:var(--txt3);margin-top:2px;}
+.card > canvas{display:block;width:100%!important;max-width:100%;}
+.card > canvas[height="160"]{height:160px!important;}
+.card > canvas[height="220"]{height:220px!important;}
+.card > canvas[height="240"]{height:240px!important;}
+.card > canvas[height="260"]{height:260px!important;}
+.chart-box{position:relative;width:100%;min-width:0;}
+.chart-box.h160{height:160px;}
+.chart-box.h220{height:220px;}
+.chart-box.h240{height:240px;}
+.chart-box.h260{height:260px;}
+.chart-box canvas{display:block;width:100%!important;height:100%!important;}
+.mini-chart-wrap canvas{display:block;width:100%!important;height:100%!important;}
 .row{display:grid;gap:14px;margin-bottom:14px;}
 .row-3{grid-template-columns:repeat(3,1fr);}
 .row-2{grid-template-columns:repeat(2,1fr);}

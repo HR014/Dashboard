@@ -10,8 +10,8 @@ const MALGUDI = {
   // Step 1: Open your Google Sheet
   // Step 2: File → Share → Publish to web → Sheet: "Lead Tracker" → CSV
   // Step 3: Paste the URL below and set USE_GSHEETS: true
-  GSHEET_URL: 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/pub?gid=0&single=true&output=csv',
-  USE_GSHEETS: false,   // ← change to true after setting URL above
+  GSHEET_URL: 'https://docs.google.com/spreadsheets/d/1T3EUC1JTjE9WGfoWqACtXKCjq5OAWvbI1kKcAe8BOnc/gviz/tq?tqx=out:csv&sheet=Lead%20Tracker',
+  USE_GSHEETS: true,   // ← change to true after setting URL above
   GSHEET_INTERVAL: 30, // refresh every 30 seconds
   // ─────────────────────────────────────────────────
 
@@ -87,29 +87,48 @@ function toggleTheme() {
 // DATA FETCHING — API + Google Sheets
 // ══════════════════════════════════
 async function fetchData(endpoint, query = '') {
-  // 1. Try backend REST API
+  // Prefer Google Sheets for leads when enabled, then fall back to API/sample data.
+  if (MALGUDI.USE_GSHEETS && endpoint === 'leads') {
+    const sheetData = await fetchGSheets();
+    if (sheetData) return sheetData;
+  }
+
   try {
     const r = await fetch(`${MALGUDI.API}/${endpoint}${query ? '?' + query : ''}`);
-    if (r.ok) { const d = await r.json(); if (d) return d; }
+    if (r.ok) {
+      const d = await r.json();
+      if (d) {
+        if (MALGUDI.USE_GSHEETS && endpoint === 'leads') d.sheetFallback = true;
+        return d;
+      }
+    }
   } catch(e) {}
-  // 2. Fallback to Google Sheets (leads only)
-  if (MALGUDI.USE_GSHEETS && endpoint === 'leads') return await fetchGSheets();
   return null;
 }
 
 async function fetchGSheets() {
   try {
-    const r = await fetch(MALGUDI.GSHEET_URL);
-    if (!r.ok) throw new Error('Sheet not accessible');
-    const csv = await r.text();
-    const rows = csv.trim().split('\n');
-    const headers = parseCSVRow(rows[0]);
+    let csv = '';
+    let lastStatus = '';
+    for (const url of getSheetCsvUrls(MALGUDI.GSHEET_URL)) {
+      const bust = url.includes('?') ? '&' : '?';
+      const proxiedUrl = `${MALGUDI.API}/sheet-csv?url=${encodeURIComponent(`${url}${bust}_=${Date.now()}`)}`;
+      const r = await fetch(proxiedUrl);
+      lastStatus = `${r.status} ${r.statusText}`;
+      if (r.ok) {
+        csv = await r.text();
+        break;
+      }
+    }
+    if (!csv) throw new Error(`Sheet CSV not accessible (${lastStatus})`);
+    const rows = parseCSVRows(csv.trim());
+    const headers = parseCSVRow(rows[0]).map(cleanHeader);
     const data = rows.slice(1).filter(r => r.trim()).map(row => {
       const vals = parseCSVRow(row);
       const obj = {};
-      headers.forEach((h, i) => obj[h.replace(/"/g,'').trim()] = (vals[i]||'').replace(/"/g,'').trim());
-      return obj;
-    });
+      headers.forEach((h, i) => { if (h) obj[h] = cleanCell(vals[i]); });
+      return normalizeLeadRow(obj);
+    }).filter(row => row.Sr || row.Date || row['Company Name']);
     return { total: data.length, data, source: 'gsheets' };
   } catch(e) {
     console.warn('Google Sheets fetch failed:', e.message);
@@ -117,15 +136,108 @@ async function fetchGSheets() {
   }
 }
 
+function getSheetCsvUrls(url) {
+  const raw = String(url || '').trim();
+  const match = raw.match(/\/spreadsheets\/d\/([^/]+)/);
+  if (!match) return [raw];
+  const gid = (raw.match(/[?&]gid=(\d+)/) || [null, '0'])[1];
+  const id = match[1];
+  return [
+    raw,
+    `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&gid=${gid}`,
+    `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=Lead%20Tracker`,
+    `https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${gid}`,
+    `https://docs.google.com/spreadsheets/d/${id}/pub?gid=${gid}&single=true&output=csv`
+  ];
+}
+
+function cleanHeader(value) {
+  return String(value || '').replace(/"/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function cleanCell(value) {
+  return String(value || '').replace(/^"|"$/g, '').trim();
+}
+
+function normalizeLeadRow(row) {
+  const compact = {};
+  Object.entries(row).forEach(([key, value]) => {
+    compact[cleanHeader(key).toLowerCase()] = value;
+  });
+  const pick = (...keys) => keys.map(k => compact[cleanHeader(k).toLowerCase()]).find(v => v !== undefined && v !== null && String(v).trim() !== '') || '';
+  const normalized = { ...row };
+
+  normalized.Sr = pick('Sr', 'Sr no', 'Sr No', 'SR NO', 'S.No', 'S No', 'Serial No') || normalized.Sr;
+  normalized.Date = normalizeDate(pick('Date', 'Lead Date', 'Inquiry Date'));
+  normalized['Company Name'] = pick('Company Name', 'Company', 'Customer Name', 'Client Name');
+  normalized.Location = pick('Location', 'City', 'Place');
+  normalized.State = pick('State', 'States', 'Others', 'STATE');
+  normalized['Product Type'] = pick('Product Type', 'Product', 'Product/Service');
+  normalized['Capacity / Specs'] = pick('Capacity / Specs', 'Capacity', 'Specs', 'Requirement');
+  normalized.Phone = pick('Phone', 'Mobile', 'Contact No', 'Contact Number');
+  normalized.Email = pick('Email', 'Mail');
+  normalized['Inquiry Status'] = pick('Inquiry Status', 'Status', 'Lead Status');
+  normalized['Lead Source'] = pick('Lead Source', 'Source', 'Channel');
+  normalized['Lead Owner'] = pick('Lead Owner', 'Owner', 'Sales Person', 'Salesperson');
+  normalized['Contact Person'] = pick('Contact Person', 'Contact', 'Person');
+  normalized['Quotation No'] = pick('Quotation No', 'Quote No', 'Quotation Number');
+  normalized['Quotation Date'] = normalizeDate(pick('Quotation Date', 'Quote Date'));
+  normalized['Expected Order Value'] = pick('Expected Order Value', 'Order Value', 'Value', 'Amount');
+  normalized['Quotation Status'] = pick('Quotation Status', 'Quote Status');
+  normalized['Order Loss Analysis'] = pick('Order Loss Analysis', 'Order loss Analysis', 'Loss Analysis', 'Order Loss');
+  normalized.Remarks = pick('Remarks', 'Remark', 'Notes');
+
+  return normalized;
+}
+
+function normalizeDate(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  const m = raw.match(/^(\d{1,2})[-/ ]([A-Za-z]{3,})[-/ ](\d{2,4})$/);
+  if (m) {
+    const months = { jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11 };
+    const month = months[m[2].slice(0,3).toLowerCase()];
+    const year = Number(m[3].length === 2 ? `20${m[3]}` : m[3]);
+    if (month !== undefined) {
+      const dt = new Date(Date.UTC(year, month, Number(m[1])));
+      return dt.toISOString().slice(0, 10);
+    }
+  }
+  const dt = new Date(raw);
+  return isNaN(dt) ? raw : dt.toISOString().slice(0, 10);
+}
+
 function parseCSVRow(row) {
   const result = []; let cur = ''; let inQ = false;
   for (let i = 0; i < row.length; i++) {
-    if (row[i] === '"') inQ = !inQ;
+    if (row[i] === '"' && row[i + 1] === '"') { cur += '"'; i++; }
+    else if (row[i] === '"') inQ = !inQ;
     else if (row[i] === ',' && !inQ) { result.push(cur); cur = ''; }
     else cur += row[i];
   }
   result.push(cur);
   return result;
+}
+
+function parseCSVRows(csv) {
+  const rows = [];
+  let cur = '';
+  let inQ = false;
+  for (let i = 0; i < csv.length; i++) {
+    const ch = csv[i];
+    if (ch === '"' && csv[i + 1] === '"') { cur += '""'; i++; }
+    else if (ch === '"') { inQ = !inQ; cur += ch; }
+    else if ((ch === '\n' || ch === '\r') && !inQ) {
+      if (cur.trim()) rows.push(cur);
+      cur = '';
+      if (ch === '\r' && csv[i + 1] === '\n') i++;
+    } else {
+      cur += ch;
+    }
+  }
+  if (cur.trim()) rows.push(cur);
+  return rows;
 }
 
 // Show Google Sheets sync status in header
@@ -135,6 +247,9 @@ function updateSyncStatus(source) {
   if (source === 'gsheets') {
     el.innerHTML = `<span class="gsync-dot live"></span> Google Sheets Live`;
     el.style.color = 'var(--green)';
+  } else if (source === 'api-fallback') {
+    el.innerHTML = `<span class="gsync-dot offline"></span> Sheet Failed - API Fallback`;
+    el.style.color = 'var(--amber)';
   } else if (source === 'api') {
     el.innerHTML = `<span class="gsync-dot live"></span> API Connected`;
     el.style.color = 'var(--green)';
@@ -201,6 +316,7 @@ function mkChart(id, cfg) {
   el.style.maxWidth = '100%';
   el.style.maxHeight = '100%';
   CH[id] = new Chart(el, cfg);
+  CH[id].resize();
   return CH[id];
 }
 function sortMonths(obj) {

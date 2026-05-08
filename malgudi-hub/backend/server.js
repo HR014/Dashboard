@@ -42,6 +42,24 @@ function readJSON(filename) {
   return JSON.parse(fs.readFileSync(fp, 'utf8'));
 }
 
+app.get('/api/sheet-csv', async (req, res) => {
+  try {
+    const rawUrl = String(req.query.url || '');
+    const url = new URL(rawUrl);
+    if (url.hostname !== 'docs.google.com' || !url.pathname.includes('/spreadsheets/')) {
+      return res.status(400).send('Invalid Google Sheets URL');
+    }
+
+    const upstream = await fetch(rawUrl, { redirect: 'follow' });
+    if (!upstream.ok) return res.status(upstream.status).send(`Sheet fetch failed: ${upstream.statusText}`);
+
+    const csv = await upstream.text();
+    res.type('text/csv').send(csv);
+  } catch (err) {
+    res.status(500).send(`Sheet proxy error: ${err.message}`);
+  }
+});
+
 // ── API: LEADS ───────────────────────────────────────────
 // Reads from "Lead Tracker.xlsx" or falls back to leads.json
 app.get('/api/leads', (req, res) => {
