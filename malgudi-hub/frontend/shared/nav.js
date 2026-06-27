@@ -1,17 +1,23 @@
 /* ═══════════════════════════════════════════════════
    MALGUDI CRANES — Shared Navigation, Auth & Helpers
-   v2.0 — with Google Sheets Live Integration
+   v2.0 — backend Excel integration
    ═══════════════════════════════════════════════════ */
 
 const MALGUDI = {
-  API: 'http://localhost:3000/api',
+  API: `${window.location.origin}/api`,
 
   // ── GOOGLE SHEETS CONFIG ──────────────────────────
   // Step 1: Open your Google Sheet
   // Step 2: File → Share → Publish to web → Sheet: "Lead Tracker" → CSV
-  // Step 3: Paste the URL below and set USE_GSHEETS: true
+  // Leads load from backend/data/Lead Tracker.xlsx by default.
   GSHEET_URL: 'https://docs.google.com/spreadsheets/d/1T3EUC1JTjE9WGfoWqACtXKCjq5OAWvbI1kKcAe8BOnc/gviz/tq?tqx=out:csv&sheet=Lead%20Tracker',
-  USE_GSHEETS: true,   // ← change to true after setting URL above
+  SALES_SHEET_ID: '1K3OJfyovT8gOgN785XHsRWaxJSVpZxN4P-28V-0zsIA',
+  USE_GSHEETS: false,
+  LEAD_SHEETS: {
+    '2024-2025': '2024-2025',
+    '2025-2026': '2025-2026',
+    '2026-2027': '2026-2027'
+  },
   GSHEET_INTERVAL: 30, // refresh every 30 seconds
   // ─────────────────────────────────────────────────
 
@@ -63,6 +69,69 @@ function buildNav(activePage) {
   `).join('');
 }
 
+/**
+ * Centralized Tab/Entity Switching Logic
+ * Handles .active toggling for buttons and visibility for panels.
+ * Accessible globally as switchTab() or switchSalesEntity().
+ */
+function switchTab(id) {
+  if (!id) return;
+
+  // Update global state variables if the current page uses them
+  if (typeof window.CURRENT_ENTITY !== 'undefined') window.CURRENT_ENTITY = id;
+  if (typeof window.CURRENT_TAB !== 'undefined') window.CURRENT_TAB = id;
+  if (typeof window.CURRENT_SALES_ENTITY !== 'undefined') window.CURRENT_SALES_ENTITY = id;
+
+  // Toggle 'active' class on any element with matching data-tab or data-ent
+  document.querySelectorAll('[data-tab], [data-ent], [data-sales-entity]').forEach(el => {
+    const val = el.dataset.tab || el.dataset.ent || el.dataset.salesEntity;
+    el.classList.toggle('active', val === id);
+  });
+
+  // Toggle visibility for elements with .tab-panel class or data-panel attribute
+  document.querySelectorAll('.tab-panel, [data-panel]').forEach(panel => {
+    const isMatch = panel.id === `${id}-panel` || panel.dataset.panel === id;
+    panel.classList.toggle('active', isMatch);
+    if (panel.classList.contains('tab-panel')) {
+      panel.style.display = isMatch ? 'block' : 'none';
+    }
+  });
+
+  // Trigger page-specific refresh functions if they exist
+  if (typeof updateAll === 'function') updateAll();
+  if (typeof renderCharts === 'function') renderCharts();
+}
+
+// Expose globally for both JS access and HTML onclick handlers
+window.switchTab = switchTab;
+window.switchSalesEntity = switchTab;
+
+function applyFilters() {}
+
+function resetFilters() {
+  ['fFrom','fTo','tblSearch'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['fState','fProd','fOwner','fSrc','fStatus'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  if (typeof renderCharts === 'function') renderCharts();
+  if (typeof renderTable === 'function') renderTable();
+}
+
+// Global delegated click handler for tab buttons
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-tab], [data-ent], [data-sales-entity]');
+  // Only trigger if it's a tab button (and doesn't have an href)
+  if (btn && !btn.getAttribute('href')) {
+    e.preventDefault();
+    const id = btn.dataset.tab || btn.dataset.ent || btn.dataset.salesEntity;
+    switchTab(id);
+  }
+});
+
 // ══════════════════════════════════
 // THEME
 // ══════════════════════════════════
@@ -83,18 +152,37 @@ function toggleTheme() {
   if (typeof redrawCharts === 'function') redrawCharts();
 }
 
+/**
+ * Returns the current Financial Year string (e.g., "2025-2026")
+ */
+function getCurrentFY() {
+  const now = new Date();
+  const year = now.getFullYear();
+  // April (month 3) starts the FY in India
+  return (now.getMonth() >= 3) ? `${year}-${year + 1}` : `${year - 1}-${year}`;
+}
+window.getCurrentFY = getCurrentFY; // Expose for page-level initialization
+
 // ══════════════════════════════════
 // DATA FETCHING — API + Google Sheets
 // ══════════════════════════════════
 async function fetchData(endpoint, query = '') {
+  const params = new URLSearchParams(query.startsWith('?') ? query.slice(1) : query);
+
   // Prefer Google Sheets for leads when enabled, then fall back to API/sample data.
   if (MALGUDI.USE_GSHEETS && endpoint === 'leads') {
-    const sheetData = await fetchGSheets();
+    const year = params.get('year') || getCurrentFY();
+    const sheetData = await fetchGSheets(year);
     if (sheetData) return sheetData;
   }
 
   try {
-    const r = await fetch(`${MALGUDI.API}/${endpoint}${query ? '?' + query : ''}`);
+    // If fetching leads and no year is specified, default to current FY
+    if (endpoint === 'leads' && !params.has('year')) {
+      params.set('year', getCurrentFY());
+    }
+    params.set('_', Date.now());
+    const r = await fetch(`${MALGUDI.API}/${endpoint}?${params.toString()}`, { cache: 'no-store' });
     if (r.ok) {
       const d = await r.json();
       if (d) {
@@ -106,11 +194,13 @@ async function fetchData(endpoint, query = '') {
   return null;
 }
 
-async function fetchGSheets() {
+async function fetchGSheets(year) {
   try {
     let csv = '';
     let lastStatus = '';
-    for (const url of getSheetCsvUrls(MALGUDI.GSHEET_URL)) {
+    const sheetName = MALGUDI.LEAD_SHEETS[year] || 'Lead Tracker';
+
+    for (const url of getSheetCsvUrls(MALGUDI.GSHEET_URL, sheetName)) {
       const bust = url.includes('?') ? '&' : '?';
       const proxiedUrl = `${MALGUDI.API}/sheet-csv?url=${encodeURIComponent(`${url}${bust}_=${Date.now()}`)}`;
       const r = await fetch(proxiedUrl);
@@ -136,16 +226,16 @@ async function fetchGSheets() {
   }
 }
 
-function getSheetCsvUrls(url) {
+function getSheetCsvUrls(url, sheetName = 'Lead Tracker') {
   const raw = String(url || '').trim();
   const match = raw.match(/\/spreadsheets\/d\/([^/]+)/);
   if (!match) return [raw];
   const gid = (raw.match(/[?&]gid=(\d+)/) || [null, '0'])[1];
   const id = match[1];
   return [
-    raw,
+    raw.replace(/sheet=[^&]+/, `sheet=${encodeURIComponent(sheetName)}`),
     `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&gid=${gid}`,
-    `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=Lead%20Tracker`,
+    `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`,
     `https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${gid}`,
     `https://docs.google.com/spreadsheets/d/${id}/pub?gid=${gid}&single=true&output=csv`
   ];
@@ -182,6 +272,7 @@ function normalizeLeadRow(row) {
   normalized['Contact Person'] = pick('Contact Person', 'Contact', 'Person');
   normalized['Quotation No'] = pick('Quotation No', 'Quote No', 'Quotation Number');
   normalized['Quotation Date'] = normalizeDate(pick('Quotation Date', 'Quote Date'));
+  normalized['PO Date'] = normalizeDate(pick('PO Date', 'PO DATE', 'PO DAT', 'Purchase Order Date', 'Order Date'));
   normalized['Expected Order Value'] = pick('Expected Order Value', 'Order Value', 'Value', 'Amount');
   normalized['Quotation Status'] = pick('Quotation Status', 'Quote Status');
   normalized['Order Loss Analysis'] = pick('Order Loss Analysis', 'Order loss Analysis', 'Loss Analysis', 'Order Loss');
@@ -194,6 +285,10 @@ function normalizeDate(value) {
   const raw = String(value || '').trim();
   if (!raw) return '';
   if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  if (/^\d{5}(?:\.\d+)?$/.test(raw)) {
+    const dt = new Date(Math.round((Number(raw) - 25569) * 86400 * 1000));
+    return isNaN(dt) ? '' : dt.toISOString().slice(0, 10);
+  }
   const m = raw.match(/^(\d{1,2})[-/ ]([A-Za-z]{3,})[-/ ](\d{2,4})$/);
   if (m) {
     const months = { jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11 };
@@ -251,7 +346,7 @@ function updateSyncStatus(source) {
     el.innerHTML = `<span class="gsync-dot offline"></span> Sheet Failed - API Fallback`;
     el.style.color = 'var(--amber)';
   } else if (source === 'api') {
-    el.innerHTML = `<span class="gsync-dot live"></span> API Connected`;
+    el.innerHTML = `<span class="gsync-dot live"></span> Excel File Live`;
     el.style.color = 'var(--green)';
   } else {
     el.innerHTML = `<span class="gsync-dot offline"></span> Sample Data`;
@@ -262,6 +357,14 @@ function updateSyncStatus(source) {
 // ══════════════════════════════════
 // HELPERS
 // ══════════════════════════════════
+function fmtDateLabel(d) {
+  if (!d) return '-';
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return d;
+  const day = String(dt.getDate()).padStart(2, '0');
+  const mon = dt.toLocaleString('en-IN', { month: 'short' }).replace('.', '');
+  return `${day}-${mon}-${dt.getFullYear()}`;
+}
 function fmtINR(n) {
   n = parseFloat(n) || 0;
   if (n >= 1e7) return '₹' + (n/1e7).toFixed(2) + ' Cr';
@@ -269,7 +372,7 @@ function fmtINR(n) {
   if (n >= 1000) return '₹' + (n/1000).toFixed(1) + ' K';
   return '₹' + n.toFixed(0);
 }
-function parseVal(v) { return parseFloat(String(v||'0').replace(/[₹,\s]/g,''))||0; }
+function parseVal(v) { return parseFloat(String(v||'0').replace(/[^0-9.-]/g,''))||0; }
 function groupBy(arr, key) { return arr.reduce((a,i)=>{ const k=i[key]||'Unknown'; a[k]=(a[k]||0)+1; return a; },{}); }
 function sumByKey(arr,kG,kS) { return arr.reduce((a,i)=>{ const k=i[kG]||'Unknown'; a[k]=(a[k]||0)+parseVal(i[kS]); return a; },{}); }
 function setV(id,val) { const el=document.getElementById(id); if(el) el.textContent=val; }

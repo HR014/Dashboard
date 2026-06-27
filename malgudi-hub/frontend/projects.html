@@ -17,13 +17,23 @@
     <div class="user-pill" onclick="doLogout()"><div class="user-av" id="userAv">A</div><span id="userNm">admin</span></div>
   </div>
 </header>
+<div class="filter-bar">
+  <div class="fg"><label>📅 From</label><input type="date" id="fFrom" onchange="applyFilters()"></div>
+  <div class="fg"><label>To</label><input type="date" id="fTo" onchange="applyFilters()"></div>
+  <div class="fg"><label>🗺 State</label><select id="fState" onchange="applyFilters()"><option value="">All</option></select></div>
+  <div class="fg"><label>📦 Product</label><select id="fProd" onchange="applyFilters()"><option value="">All</option></select></div>
+  <div class="fg"><label>👤 Owner</label><select id="fOwner" onchange="applyFilters()"><option value="">All</option></select></div>
+  <div class="fg"><label>📡 Source</label><select id="fSrc" onchange="applyFilters()"><option value="">All</option></select></div>
+  <div class="fg"><label>🔁 Status</label><select id="fStatus" onchange="applyFilters()"><option value="">All</option></select></div>
+  <button class="btn-rst" onclick="resetFilters()">↺ Reset</button>
+</div>
 <main class="main">
 <div class="kpi-grid">
-  <div class="kpi-card" style="--kc:#f59e0b"><div class="kpi-ico">🔧</div><div class="kpi-lbl">Active Projects</div><div class="kpi-val">12</div><div class="kpi-sub">In progress</div></div>
-  <div class="kpi-card" style="--kc:#10b981"><div class="kpi-ico">✅</div><div class="kpi-lbl">Delivered</div><div class="kpi-val">8</div><div class="kpi-sub">FY 2025–26</div></div>
-  <div class="kpi-card" style="--kc:#ef4444"><div class="kpi-ico">⚠️</div><div class="kpi-lbl">Delayed</div><div class="kpi-val">3</div><div class="kpi-sub">Past due date</div></div>
-  <div class="kpi-card" style="--kc:#3b82f6"><div class="kpi-ico">📅</div><div class="kpi-lbl">This Month</div><div class="kpi-val">4</div><div class="kpi-sub">Scheduled delivery</div></div>
-  <div class="kpi-card" style="--kc:#a855f7"><div class="kpi-ico">💰</div><div class="kpi-lbl">Order Book Value</div><div class="kpi-val">₹3.8 Cr</div><div class="kpi-sub">Active projects</div></div>
+  <div class="kpi-card" style="--kc:#f59e0b"><div class="kpi-ico">🔧</div><div class="kpi-meta"><div class="kpi-lbl">Active Projects</div><div class="kpi-sub">In progress</div></div><div class="kpi-val">12</div></div>
+  <div class="kpi-card" style="--kc:#10b981"><div class="kpi-ico">✅</div><div class="kpi-meta"><div class="kpi-lbl">Delivered</div><div class="kpi-sub">FY 2025–26</div></div><div class="kpi-val">8</div></div>
+  <div class="kpi-card" style="--kc:#ef4444"><div class="kpi-ico">⚠️</div><div class="kpi-meta"><div class="kpi-lbl">Delayed</div><div class="kpi-sub">Past due date</div></div><div class="kpi-val">3</div></div>
+  <div class="kpi-card" style="--kc:#3b82f6"><div class="kpi-ico">📅</div><div class="kpi-meta"><div class="kpi-lbl">This Month</div><div class="kpi-sub">Scheduled delivery</div></div><div class="kpi-val">4</div></div>
+  <div class="kpi-card" style="--kc:#a855f7"><div class="kpi-ico">💰</div><div class="kpi-meta"><div class="kpi-lbl">Order Book Value</div><div class="kpi-sub">Active projects</div></div><div class="kpi-val">₹3.8 Cr</div></div>
 </div>
 <div class="row row-2">
   <div class="card"><div class="card-hdr"><div class="card-title">Project Status Distribution</div><div class="card-sub">Current pipeline breakdown</div></div><div class="chart-box h240"><canvas id="cProjStatus"></canvas></div></div>

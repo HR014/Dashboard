@@ -6,6 +6,14 @@
 <title>Lead Tracker — Malgudi BI Hub</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared/style.css">
+<style>
+  .hide-amt .kpi-amt {
+    filter: blur(6px);
+    user-select: none;
+    pointer-events: none;
+    transition: filter 0.3s ease;
+  }
+</style>
 </head>
 <body>
 <script src="shared/nav.js"></script>
@@ -24,28 +32,49 @@
 
 <!-- FILTERS -->
 <div class="filter-bar">
-  <div class="fg"><label>📅 From</label><input type="date" id="fFrom" onchange="applyFilters()"></div>
-  <div class="fg"><label>To</label><input type="date" id="fTo" onchange="applyFilters()"></div>
-  <div class="fg"><label>🗺 State</label><select id="fState" onchange="applyFilters()"><option value="">All States</option></select></div>
-  <div class="fg"><label>📦 Product</label><select id="fProd" onchange="applyFilters()"><option value="">All Products</option></select></div>
-  <div class="fg"><label>👤 Owner</label><select id="fOwner" onchange="applyFilters()"><option value="">All Owners</option></select></div>
-  <div class="fg"><label>📡 Source</label><select id="fSrc" onchange="applyFilters()"><option value="">All Sources</option></select></div>
-  <div class="fg"><label>🔁 Status</label><select id="fStatus" onchange="applyFilters()"><option value="">All Status</option></select></div>
+  <div class="fg"><label>📅 From</label><input type="date" id="fFrom" title="From date" onchange="applyFilters()"></div>
+  <div class="fg"><label>To</label><input type="date" id="fTo" title="To date" onchange="applyFilters()"></div>
+  <div class="fg fy-switch"><label>FY</label><button type="button" class="btn-fy" id="fFyBtn" title="Switch financial year" onclick="cycleLeadFY()">FY</button></div>
+  <div class="fg"><label>🗺 State</label><select id="fState" title="Filter by state" aria-label="Filter by state" onchange="applyFilters()"><option value="">All States</option></select></div>
+  <div class="fg"><label>📦 Product</label><select id="fProd" title="Filter by product" aria-label="Filter by product" onchange="applyFilters()"><option value="">All Products</option></select></div>
+  <div class="fg"><label>👤 Owner</label><select id="fOwner" title="Filter by owner" aria-label="Filter by owner" onchange="applyFilters()"><option value="">All Owners</option></select></div>
+  <div class="fg"><label>📡 Source</label><select id="fSrc" title="Filter by source" aria-label="Filter by source" onchange="applyFilters()"><option value="">All Sources</option></select></div>
+  <div class="fg"><label>🔁 Status</label><select id="fStatus" title="Filter by inquiry status" aria-label="Filter by inquiry status" onchange="applyFilters()"><option value="">All Status</option></select></div>
   <button class="btn-rst" onclick="resetFilters()">↺ Reset</button>
 </div>
 
 <main class="main">
-<!-- KPI CARDS -->
-<div class="kpi-grid">
-  <div class="kpi-card" style="--kc:#6366f1"><div class="kpi-ico">📋</div><div class="kpi-lbl">Total Leads</div><div class="kpi-val" id="vTotal">—</div><div class="kpi-sub">FY 2025–26</div></div>
-  <div class="kpi-card" style="--kc:#06b6d4"><div class="kpi-ico">🔥</div><div class="kpi-lbl">Active</div><div class="kpi-val" id="vActive">—</div><div class="kpi-sub">Open pipeline</div></div>
-  <div class="kpi-card" style="--kc:#f59e0b"><div class="kpi-ico">📄</div><div class="kpi-lbl">Quotations</div><div class="kpi-val" id="vQuot">—</div><div class="kpi-sub">Generated</div></div>
-  <div class="kpi-card" style="--kc:#f97316"><div class="kpi-ico">📝</div><div class="kpi-lbl">Quotation Required</div><div class="kpi-val" id="vQuotReq">—</div><div class="kpi-sub">Pending quote</div></div>
-  <div class="kpi-card" style="--kc:#10b981"><div class="kpi-ico">🏆</div><div class="kpi-lbl">Orders Won</div><div class="kpi-val" id="vWon">—</div><div class="kpi-sub" id="dWon">Confirmed</div></div>
-  <div class="kpi-card" style="--kc:#ef4444"><div class="kpi-ico">❌</div><div class="kpi-lbl">Orders Lost</div><div class="kpi-val" id="vLost">—</div><div class="kpi-sub">Not converted</div></div>
-  <div class="kpi-card" style="--kc:#a855f7"><div class="kpi-ico">📈</div><div class="kpi-lbl">Conversion %</div><div class="kpi-val" id="vConv">—</div><div class="kpi-sub">Won / Total</div></div>
-  <div class="kpi-card span2" style="--kc:#3b82f6"><div class="kpi-ico">💰</div><div class="kpi-lbl">Pipeline Value</div><div class="kpi-val" id="vRev">—</div><div class="kpi-sub">Expected orders</div></div>
-  <div class="kpi-card span2" style="--kc:#10b981"><div class="kpi-ico">🏦</div><div class="kpi-lbl">Won Revenue</div><div class="kpi-val" id="vWonRev">—</div><div class="kpi-sub">Confirmed value</div></div>
+<!-- PRIVACY TOGGLE -->
+<div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+  <label style="display:flex; align-items:center; gap:8px; font-size:0.75rem; color:var(--txt2); cursor:pointer; background:var(--s1); padding:6px 12px; border-radius:6px; border:1px solid var(--bdr);">
+    <input type="checkbox" id="amtToggle" onchange="togglePrivacy(this.checked)"> 🔒 Privacy Mode (Hide Amounts)
+  </label>
+</div>
+
+<!-- KPI SECTION: FINANCIAL AMOUNTS -->
+<div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+  <div class="kpi-card" style="--kc:#3b82f6"><div class="kpi-ico">💰</div><div class="kpi-meta"><div class="kpi-lbl">Pipeline Value</div><div class="kpi-sub">Total Potential</div></div><div class="kpi-val kpi-amt" id="vRev">—</div></div>
+  <div class="kpi-card" style="--kc:#10b981"><div class="kpi-ico">🏦</div><div class="kpi-meta"><div class="kpi-lbl">Total Confirmed</div><div class="kpi-sub">PO Received Value</div></div><div class="kpi-val kpi-amt" id="vWonRev">—</div></div>
+  <div class="kpi-card" style="--kc:#10b981"><div class="kpi-ico">💵</div><div class="kpi-meta"><div class="kpi-lbl">PO Recd Value</div><div class="kpi-sub">This Month</div></div><div class="kpi-val kpi-amt" id="vWonMonthRev">-</div></div>
+  <div class="kpi-card" style="--kc:#f97316"><div class="kpi-ico">📨</div><div class="kpi-meta"><div class="kpi-lbl">PO Expected</div><div class="kpi-sub">Expected PO Value</div></div><div class="kpi-val kpi-amt" id="vPOExpected">—</div></div>
+  <div class="kpi-card" style="--kc:#06b6d4"><div class="kpi-ico">💳</div><div class="kpi-meta"><div class="kpi-lbl">Avg Order Value</div><div class="kpi-sub">Per Won Deal</div></div><div class="kpi-val kpi-amt" id="vAvgOrder">—</div></div>
+</div>
+
+<!-- KPI SECTION: PERFORMANCE COUNTS -->
+<div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+  <div class="kpi-card" style="--kc:#6366f1"><div class="kpi-ico">📋</div><div class="kpi-meta"><div class="kpi-lbl">Total Leads</div><div class="kpi-sub" id="vFyLabel">Current FY</div></div><div class="kpi-val" id="vTotal">—</div></div>
+  <div class="kpi-card" style="--kc:#3b82f6"><div class="kpi-ico">📅</div><div class="kpi-meta"><div class="kpi-lbl">This Month</div><div class="kpi-sub">New Leads</div></div><div class="kpi-val" id="vMonth">-</div></div>
+  <div class="kpi-card" style="--kc:#10b981"><div class="kpi-ico">🤝</div><div class="kpi-meta"><div class="kpi-lbl">Won (Month)</div><div class="kpi-sub">Order Count</div></div><div class="kpi-val" id="vWonMonth">-</div></div>
+  <div class="kpi-card" style="--kc:#a855f7"><div class="kpi-ico">📈</div><div class="kpi-meta"><div class="kpi-lbl">Conversion %</div><div class="kpi-sub">Won / Total</div></div><div class="kpi-val" id="vConv">—</div></div>
+  <div class="kpi-card" style="--kc:#10b981"><div class="kpi-ico">🏆</div><div class="kpi-meta"><div class="kpi-lbl">Orders Won</div><div class="kpi-sub" id="dWon">Confirmed</div></div><div class="kpi-val" id="vWon">—</div></div>
+  <div class="kpi-card" style="--kc:#ef4444"><div class="kpi-ico">❌</div><div class="kpi-meta"><div class="kpi-lbl">Orders Lost</div><div class="kpi-sub">Not converted</div></div><div class="kpi-val" id="vLost">—</div></div>
+</div>
+
+<!-- KPI SECTION: INQUIRY FUNNEL STATUS -->
+<div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+  <div class="kpi-card" style="--kc:#06b6d4"><div class="kpi-ico">🔥</div><div class="kpi-meta"><div class="kpi-lbl">Active</div><div class="kpi-sub">Open pipeline</div></div><div class="kpi-val" id="vActive">—</div></div>
+  <div class="kpi-card" style="--kc:#f59e0b"><div class="kpi-ico">📄</div><div class="kpi-meta"><div class="kpi-lbl">Quotations</div><div class="kpi-sub">Generated</div></div><div class="kpi-val" id="vQuot">—</div></div>
+  <div class="kpi-card" style="--kc:#f97316"><div class="kpi-ico">📝</div><div class="kpi-meta"><div class="kpi-lbl">Quot. Required</div><div class="kpi-sub">Pending quote</div></div><div class="kpi-val" id="vQuotReq">—</div></div>
 </div>
 
 <!-- FUNNEL + PIE ROW -->
@@ -103,7 +132,7 @@
     <input class="tbl-search" id="tblSearch" placeholder="🔍 Search company, contact, state..." oninput="searchTable()">
   </div>
   <div class="tbl-wrap">
-    <table><thead><tr><th>Sr no</th><th>Date</th><th>Company Name</th><th>Location</th><th>Others</th><th>Product Type</th><th>Capacity / Specs</th><th>Phone</th><th>Email</th><th>Inquiry Status</th><th>Contact Person</th><th>Lead Source</th><th>Lead Owner</th><th>Quotation No</th><th>Quotation Date</th><th>Order Value</th><th>Quotation Status</th><th>Order Loss Analysis</th><th>Remarks</th></tr></thead>
+    <table><thead><tr><th>Sr no</th><th>Date</th><th>Company Name</th><th>Location</th><th>Others</th><th>Product Type</th><th>Capacity / Specs</th><th>Phone</th><th>Email</th><th>Inquiry Status</th><th>Contact Person</th><th>Lead Source</th><th>Lead Owner</th><th>Quotation No</th><th>Quotation Date</th><th>PO Date</th><th>Order Value</th><th>Quotation Status</th><th>Order Loss Analysis</th><th>Remarks</th></tr></thead>
     <tbody id="leadsBody"></tbody></table>
   </div>
   <div class="tbl-pag">
@@ -142,6 +171,7 @@ const SAMPLE = [
 
 let allLeads = [], filteredLeads = [], page = 0;
 const PAGE_SZ = 15;
+let activeLeadFY = getCurrentFY();
 
 function statusBadge(s) {
   s = (s||'').trim();
@@ -190,12 +220,10 @@ function applyFilters() {
 }
 
 function resetFilters() {
-  ['fFrom','fTo','tblSearch'].forEach(id => document.getElementById(id).value = '');
+  ['tblSearch'].forEach(id => document.getElementById(id).value = '');
   ['fState','fProd','fOwner','fSrc','fStatus'].forEach(id => document.getElementById(id).value = '');
-  filteredLeads = [...allLeads];
-  page = 0;
-  renderTable();
-  renderCharts();
+  setLeadFYDateRange();
+  applyFilters();
 }
 
 function searchTable() { applyFilters(); }
@@ -207,7 +235,9 @@ function renderTable() {
   document.getElementById('leadsBody').innerHTML = rows.map(l => `
     <tr>
       <td style="color:var(--txt3);font-family:var(--mono)">${l['Sr']||'—'}</td>
-      <td style="font-family:var(--mono);font-size:.72rem">${l['Date']||'—'}</td>
+      <td style="font-family:var(--mono);font-size:.72rem">${fmtDateLabel(l['Date'])||'—'}</td>
+
+
       <td><b>${l['Company Name']||l['Company']||'—'}</b></td>
       <td style="color:var(--txt2)">${l['Location']||'—'}</td>
       <td>${l['State']||'—'}</td>
@@ -234,7 +264,7 @@ function renderTable() {
   document.getElementById('leadsBody').innerHTML = rows.map(l => `
     <tr>
       <td style="color:var(--txt3);font-family:var(--mono)">${l['Sr']||dash}</td>
-      <td style="font-family:var(--mono);font-size:.72rem">${l['Date']||dash}</td>
+      <td style="font-family:var(--mono);font-size:.72rem">${fmtDateLabel(l['Date'])}</td>
       <td><b>${l['Company Name']||l['Company']||dash}</b></td>
       <td style="color:var(--txt2)">${l['Location']||dash}</td>
       <td>${l['State']||l['States']||l['Others']||dash}</td>
@@ -248,6 +278,7 @@ function renderTable() {
       <td>${l['Lead Owner']||dash}</td>
       <td style="font-family:var(--mono);font-size:.72rem;color:var(--txt3)">${l['Quotation No']||dash}</td>
       <td style="font-family:var(--mono);font-size:.72rem">${l['Quotation Date']||dash}</td>
+      <td style="font-family:var(--mono);font-size:.72rem">${l['PO Date']||dash}</td>
       <td style="font-family:var(--mono);font-weight:700;color:var(--txt)">${orderValue(l)?fmtINR(orderValue(l)):dash}</td>
       <td style="color:var(--txt2)">${l['Quotation Status']||dash}</td>
       <td style="color:var(--txt2)">${l['Order Loss Analysis']||dash}</td>
@@ -262,6 +293,61 @@ function isWonStatus(s) { return /\bwin\b|\bwon\b|accepted|confirmed|po\s*receiv
 function isLostStatus(s) { return /lost|rejected/i.test(s||''); }
 function isQuotationRequiredStatus(s) { return /quotation\s*req|quotation\s*required|quote\s*required|quote\s*req/i.test(s||''); }
 function isQuotationShared(l) { return /quotation\s*shared|quotation\s*sent|quote\s*shared|quote\s*sent/i.test(`${l['Inquiry Status']||''} ${l['Quotation Status']||''}`); }
+function statusText(l) { return String(l['Inquiry Status'] || '').trim().toUpperCase().replace(/\s+/g, ' '); }
+function statusCount(leads, status) { return leads.filter(l => statusText(l) === status).length; }
+function ymd(d) {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(String(d || ''))) return String(d);
+  if (/^\d{5}(?:\.\d+)?$/.test(String(d || '').trim())) {
+    const dt = new Date(Math.round((Number(d) - 25569) * 86400 * 1000));
+    return isNaN(dt) ? '' : dt.toISOString().slice(0, 10);
+  }
+  const dt = new Date(d);
+  if (isNaN(dt)) return '';
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+}
+function currentMonthKey() {
+  const dt = new Date();
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
+}
+function fyStartDate() {
+  return `${activeLeadFY.split('-')[0]}-04-01`;
+}
+function fyLabel() {
+  const startYear = Number(activeLeadFY.split('-')[0]);
+  return `FY ${startYear}-${String(startYear + 1).slice(-2)}`;
+}
+function fyEndDate() {
+  return `${activeLeadFY.split('-')[1]}-03-31`;
+}
+function setLeadFYDateRange() {
+  const fromEl = document.getElementById('fFrom');
+  const toEl = document.getElementById('fTo');
+  if (fromEl) fromEl.value = fyStartDate();
+  if (toEl) toEl.value = fyEndDate();
+}
+function leadFYOptions() {
+  const sheetYears = (typeof MALGUDI !== 'undefined' && MALGUDI.LEAD_SHEETS) ? Object.keys(MALGUDI.LEAD_SHEETS) : [];
+  return sheetYears.length ? sheetYears : [activeLeadFY];
+}
+function updateLeadFYButton() {
+  const btn = document.getElementById('fFyBtn');
+  if (btn) btn.textContent = fyLabel();
+}
+async function switchLeadFY(fy) {
+  activeLeadFY = fy;
+  updateLeadFYButton();
+  setLeadFYDateRange();
+  await loadData(activeLeadFY);
+}
+function cycleLeadFY() {
+  const years = leadFYOptions();
+  const idx = Math.max(0, years.indexOf(activeLeadFY));
+  switchLeadFY(years[(idx + 1) % years.length]);
+}
+function isCurrentFyLead(l) {
+  const d = ymd(l.Date);
+  return d && d >= fyStartDate() && d <= fyEndDate();
+}
 function orderValue(l) { return parseVal(l['Expected Order Value'] || l['Order Value']); }
 function sumOrderValueByKey(arr,key) {
   return arr.reduce((a,i)=>{
@@ -275,23 +361,43 @@ function changePage(d) { page = Math.max(0, Math.min(page+d, Math.ceil(filteredL
 
 function renderCharts() {
   const leads = filteredLeads;
+  const kpiLeads = leads.filter(isCurrentFyLead);
   const O = getChartOpts();
   const won  = leads.filter(l => isWonStatus(l['Inquiry Status']));
   const lost = leads.filter(l => isLostStatus(l['Inquiry Status']));
   const quots= leads.filter(l => l['Quotation No']&&String(l['Quotation No']).trim());
   const quotReq = leads.filter(l => isQuotationRequiredStatus(l['Inquiry Status']));
-  const rev  = leads.reduce((s,l)=>s+orderValue(l),0);
-  const wonRev=won.reduce((s,l)=>s+orderValue(l),0);
+  const rev  = kpiLeads.reduce((s,l)=>s+orderValue(l),0);
+  const wonRev = won.reduce((s,l)=>s+orderValue(l),0);
+  const avgOrderVal = won.length ? (wonRev / won.length) : 0;
 
-  setV('vTotal', leads.length);
+  // PO Expected is based on Inquiry Status containing "Po Expected" / "PO Expected".
+  const poExpectedVal = leads
+    .filter(l => /po\s*expected/i.test(String(l['Inquiry Status'] || '')))
+    .reduce((s,l)=>s+orderValue(l),0);
+
+  setV('vPOExpected', fmtINR(poExpectedVal));
+  setV('vTotal', kpiLeads.length);
+  setV('vAvgOrder', fmtINR(avgOrderVal));
+
   setV('vActive', leads.filter(l=>/inquiry|quotation|progress/i.test(l['Inquiry Status']||'')).length);
   setV('vQuot',  quots.length);
   setV('vQuotReq', quotReq.length);
   setV('vWon',   won.length);
   setV('vLost',  lost.length);
-  setV('vConv',  leads.length ? ((won.length/leads.length)*100).toFixed(1)+'%' : '0%');
+  setV('vConv',  kpiLeads.length ? ((won.length/kpiLeads.length)*100).toFixed(1)+'%' : '0%');
   setV('vRev',   fmtINR(rev));
   setV('vWonRev',fmtINR(wonRev));
+  setV('vFyLabel', fyLabel());
+  setV('vMonth', kpiLeads.filter(l => ymd(l.Date).startsWith(currentMonthKey())).length);
+
+  // PO Received This Month is based on the actual PO Date.
+  const curMonth = currentMonthKey();
+  const wonInMonth = won.filter(l => ymd(l['PO Date']).startsWith(curMonth));
+  const wonMonthCount = wonInMonth.length;
+  const wonMonthRev = wonInMonth.reduce((s, l) => s + orderValue(l), 0);
+  setV('vWonMonth', wonMonthCount);
+  setV('vWonMonthRev', fmtINR(wonMonthRev));
 
   // Funnel
   mkChart('cFunnel',{type:'bar',data:{labels:['Inquiry','Quotation','Won','Lost'],datasets:[{data:[leads.length,quots.length,won.length,lost.length],backgroundColor:['#6366f1','#3b82f6','#10b981','#ef4444'],borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:O.tt},scales:{x:{grid:{color:O.grid}},y:{grid:{color:O.grid},beginAtZero:true}}}});
@@ -346,21 +452,28 @@ function renderCharts() {
 
 function redrawCharts() { renderCharts(); }
 
+function togglePrivacy(hide) {
+  const grid = document.querySelector('.kpi-grid');
+  if (hide) grid.classList.add('hide-amt');
+  else grid.classList.remove('hide-amt');
+}
+
 function normalizePageLead(row) {
   const state = row['State'] || row['States'] || row['Others'] || '';
   const value = row['Expected Order Value'] || row['Order Value'] || '';
-  return { ...row, State: state, States: state, Others: state, 'Expected Order Value': value, 'Order Value': value };
+  const poDate = row['PO Date'] || row['PO DATE'] || row['PO DAT'] || row['Purchase Order Date'] || row['Order Date'] || '';
+  return { ...row, State: state, States: state, Others: state, 'PO Date': ymd(poDate), 'Expected Order Value': value, 'Order Value': value };
 }
 
-async function loadData() {
-  const resp = await fetchData('leads','limit=2000');
+async function loadData(fy = activeLeadFY) {
+  activeLeadFY = fy;
+  updateLeadFYButton();
+  const resp = await fetchData('leads',`year=${encodeURIComponent(activeLeadFY)}&limit=2000`);
   const src  = resp ? (resp.sheetFallback ? 'api-fallback' : (resp.source || 'api')) : 'sample';
   allLeads   = ((resp && resp.data) ? resp.data : SAMPLE).map(normalizePageLead);
-  filteredLeads = [...allLeads];
   updateSyncStatus(src);
   populateFilters(allLeads);
-  renderTable();
-  renderCharts();
+  applyFilters();
   setV('lastSync', 'Synced: '+new Date().toLocaleTimeString());
 }
 
@@ -372,8 +485,10 @@ function exportLeads() {
   XLSX.writeFile(wb, `MalgudiLeads_${new Date().toISOString().split('T')[0]}.xlsx`);
 }
 
-loadData();
-startCountdown(30, c => setV('cdown', c), loadData);
+setLeadFYDateRange();
+updateLeadFYButton();
+loadData(activeLeadFY);
+startCountdown(30, c => setV('cdown', c), () => loadData(activeLeadFY));
 </script>
 </body>
 </html>

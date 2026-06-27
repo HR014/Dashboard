@@ -17,14 +17,24 @@
     <div class="user-pill" onclick="doLogout()"><div class="user-av" id="userAv">A</div><span id="userNm">admin</span></div>
   </div>
 </header>
+<div class="filter-bar">
+  <div class="fg"><label>📅 From</label><input type="date" id="fFrom" onchange="applyFilters()"></div>
+  <div class="fg"><label>To</label><input type="date" id="fTo" onchange="applyFilters()"></div>
+  <div class="fg"><label>🗺 State</label><select id="fState" onchange="applyFilters()"><option value="">All</option></select></div>
+  <div class="fg"><label>📦 Product</label><select id="fProd" onchange="applyFilters()"><option value="">All</option></select></div>
+  <div class="fg"><label>👤 Owner</label><select id="fOwner" onchange="applyFilters()"><option value="">All</option></select></div>
+  <div class="fg"><label>📡 Source</label><select id="fSrc" onchange="applyFilters()"><option value="">All</option></select></div>
+  <div class="fg"><label>🔁 Status</label><select id="fStatus" onchange="applyFilters()"><option value="">All</option></select></div>
+  <button class="btn-rst" onclick="resetFilters()">↺ Reset</button>
+</div>
 <main class="main">
 <div class="kpi-grid">
-  <div class="kpi-card" style="--kc:#10b981"><div class="kpi-ico">💰</div><div class="kpi-lbl">Revenue FY25-26</div><div class="kpi-val">₹4.2 Cr</div><div class="kpi-sub">Billed</div></div>
-  <div class="kpi-card" style="--kc:#3b82f6"><div class="kpi-ico">✅</div><div class="kpi-lbl">Collected</div><div class="kpi-val">₹3.1 Cr</div><div class="kpi-sub">Received</div></div>
-  <div class="kpi-card" style="--kc:#f59e0b"><div class="kpi-ico">🕐</div><div class="kpi-lbl">Receivables</div><div class="kpi-val">₹1.1 Cr</div><div class="kpi-sub">Outstanding</div></div>
-  <div class="kpi-card" style="--kc:#ef4444"><div class="kpi-ico">⚠️</div><div class="kpi-lbl">Overdue >90d</div><div class="kpi-val">₹28L</div><div class="kpi-sub">Critical</div></div>
-  <div class="kpi-card" style="--kc:#a855f7"><div class="kpi-ico">📊</div><div class="kpi-lbl">Collection %</div><div class="kpi-val">73.8%</div><div class="kpi-sub">Of billed</div></div>
-  <div class="kpi-card" style="--kc:#06b6d4"><div class="kpi-ico">🧾</div><div class="kpi-lbl">Invoices Raised</div><div class="kpi-val">62</div><div class="kpi-sub">FY 2025–26</div></div>
+  <div class="kpi-card" style="--kc:#10b981"><div class="kpi-ico">💰</div><div class="kpi-meta"><div class="kpi-lbl">Revenue FY25-26</div><div class="kpi-sub">Billed</div></div><div class="kpi-val">₹4.2 Cr</div></div>
+  <div class="kpi-card" style="--kc:#3b82f6"><div class="kpi-ico">✅</div><div class="kpi-meta"><div class="kpi-lbl">Collected</div><div class="kpi-sub">Received</div></div><div class="kpi-val">₹3.1 Cr</div></div>
+  <div class="kpi-card" style="--kc:#f59e0b"><div class="kpi-ico">🕐</div><div class="kpi-meta"><div class="kpi-lbl">Receivables</div><div class="kpi-sub">Outstanding</div></div><div class="kpi-val">₹1.1 Cr</div></div>
+  <div class="kpi-card" style="--kc:#ef4444"><div class="kpi-ico">⚠️</div><div class="kpi-meta"><div class="kpi-lbl">Overdue >90d</div><div class="kpi-sub">Critical</div></div><div class="kpi-val">₹28L</div></div>
+  <div class="kpi-card" style="--kc:#a855f7"><div class="kpi-ico">📊</div><div class="kpi-meta"><div class="kpi-lbl">Collection %</div><div class="kpi-sub">Of billed</div></div><div class="kpi-val">73.8%</div></div>
+  <div class="kpi-card" style="--kc:#06b6d4"><div class="kpi-ico">🧾</div><div class="kpi-meta"><div class="kpi-lbl">Invoices Raised</div><div class="kpi-sub">FY 2025–26</div></div><div class="kpi-val">62</div></div>
 </div>
 <div class="row row-2">
   <div class="card"><div class="card-hdr"><div class="card-title">Monthly Revenue vs Collections</div><div class="card-sub">Billed vs received trend</div></div><div class="chart-box h240"><canvas id="cAccRev"></canvas></div></div>

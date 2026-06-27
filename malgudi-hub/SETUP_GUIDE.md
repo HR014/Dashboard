@@ -1,4 +1,4 @@
-# 🏗️ Malgudi BI Hub v2.0 — Complete Setup Guide
+# 🏗️ Malgudi BI Hub v2.3 — Complete Setup Guide
 
 ## FILE STRUCTURE
 ```

@@ -145,6 +145,16 @@
     </div>
   </div>
 </header>
+<div class="filter-bar">
+  <div class="fg"><label>📅 From</label><input type="date" id="fFrom" onchange="applyFilters()"></div>
+  <div class="fg"><label>To</label><input type="date" id="fTo" onchange="applyFilters()"></div>
+  <div class="fg"><label>🗺 State</label><select id="fState" onchange="applyFilters()"><option value="">All</option></select></div>
+  <div class="fg"><label>📦 Product</label><select id="fProd" onchange="applyFilters()"><option value="">All</option></select></div>
+  <div class="fg"><label>👤 Owner</label><select id="fOwner" onchange="applyFilters()"><option value="">All</option></select></div>
+  <div class="fg"><label>📡 Source</label><select id="fSrc" onchange="applyFilters()"><option value="">All</option></select></div>
+  <div class="fg"><label>🔁 Status</label><select id="fStatus" onchange="applyFilters()"><option value="">All</option></select></div>
+  <button class="btn-rst" onclick="resetFilters()">↺ Reset</button>
+</div>
 
 <main class="main">
 
@@ -153,7 +163,7 @@
     <span id="syncStatus"><span class="gsync-dot offline"></span> Checking data source…</span>
     <span style="color:var(--txt3);font-size:.78rem;margin-left:8px;">All dashboards sync automatically</span>
     <span class="datasrc-info" id="lastSync">—</span>
-    <a href="shared/nav.js" style="color:var(--blue);font-size:.72rem;margin-left:16px;" onclick="event.preventDefault();alert('Edit GSHEET_URL in shared/nav.js and set USE_GSHEETS: true')">⚙️ Configure Google Sheets</a>
+    <a href="shared/nav.js" style="color:var(--blue);font-size:.72rem;margin-left:16px;" onclick="event.preventDefault();alert('Leads are loaded from backend/data/Lead Tracker.xlsx')">Excel Lead Tracker</a>
   </div>
 
   <!-- HERO SLIDER -->
@@ -408,23 +418,31 @@
     <a class="strip-card anim d1" href="leads.html">
       <div class="strip-ico" style="background:rgba(99,102,241,.15);">📋</div>
       <div>
-        <div class="strip-val" id="h-leads">—</div>
-        <div class="strip-lbl">Total Leads</div>
+        <div class="strip-val" id="h-leads">0</div>
+        <div class="strip-lbl">FY Leads</div>
         <div class="strip-delta delta-up" id="h-leads-d">FY 2025–26</div>
       </div>
     </a>
-    <a class="strip-card anim d2" href="leads.html">
+    <a class="strip-card anim d2" href="leads.html" style="--kc:var(--green)">
       <div class="strip-ico" style="background:rgba(16,185,129,.15);">🏆</div>
       <div>
-        <div class="strip-val" id="h-won">—</div>
-        <div class="strip-lbl">Orders Won</div>
+        <div class="strip-val kpi-amt" id="h-won">₹0</div>
+        <div class="strip-lbl">Total Confirmed</div>
         <div class="strip-delta delta-up" id="h-conv">—% conv.</div>
+      </div>
+    </a>
+    <a class="strip-card anim d2" href="leads.html" style="--kc:var(--green)">
+      <div class="strip-ico" style="background:rgba(16,185,129,.15);">🤝</div>
+      <div>
+        <div class="strip-val kpi-amt" id="h-rev-month">₹0</div>
+        <div class="strip-lbl">Won (Month)</div>
+        <div class="strip-delta delta-up"><span id="h-won-month">0</span> Orders</div>
       </div>
     </a>
     <a class="strip-card anim d3" href="leads.html">
       <div class="strip-ico" style="background:rgba(59,130,246,.15);">💰</div>
       <div>
-        <div class="strip-val" id="h-rev">—</div>
+        <div class="strip-val kpi-amt" id="h-rev">₹0</div>
         <div class="strip-lbl">Pipeline Value</div>
         <div class="strip-delta delta-up">Expected</div>
       </div>
@@ -552,84 +570,124 @@ hero.addEventListener('touchend', e => {
   if (Math.abs(dx) > 50) dx < 0 ? nextSlide() : prevSlide();
 });
 
-// ── SAMPLE DATA ──
-const SAMPLE = [
-  {State:'Maharashtra','Product Type':'EOT Crane','Lead Source':'Reference','Lead Owner':'Amit Shah','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':1850000,'Date':'2025-01-05','Quotation No':'QT-001'},
-  {State:'Karnataka','Product Type':'EOT Crane','Lead Source':'Direct','Lead Owner':'Rajesh Nair','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':5800000,'Date':'2025-01-18','Quotation No':'QT-005'},
-  {State:'Telangana','Product Type':'Gantry Crane','Lead Source':'Reference','Lead Owner':'Rajesh Nair','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':1650000,'Date':'2025-02-18','Quotation No':'QT-013'},
-  {State:'Gujarat','Product Type':'EOT Crane','Lead Source':'Direct','Lead Owner':'Amit Shah','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':8500000,'Date':'2025-04-24','Quotation No':'QT-027'},
-  {State:'Maharashtra','Product Type':'LCS Crane','Lead Source':'Reference','Lead Owner':'Priya Sharma','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':1260000,'Date':'2025-05-12','Quotation No':'QT-030'},
-  {State:'Uttar Pradesh','Product Type':'EOT Crane','Lead Source':'Reference','Lead Owner':'Rajesh Nair','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':4800000,'Date':'2025-06-21','Quotation No':'QT-038'},
-  {State:'Gujarat','Product Type':'EOT Crane','Lead Source':'Govt Tender','Lead Owner':'Priya Sharma','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':2100000,'Date':'2025-05-24','Quotation No':'QT-032'},
-  {State:'Jharkhand','Product Type':'EOT Crane','Lead Source':'Exhibition','Lead Owner':'Amit Shah','Inquiry Status':'Lost','Quotation Status':'Rejected','Expected Order Value':3200000,'Date':'2025-01-10','Quotation No':'QT-003'},
-  {State:'Gujarat','Product Type':'EOT Crane','Lead Source':'Exhibition','Lead Owner':'Rajesh Nair','Inquiry Status':'Lost','Quotation Status':'Rejected','Expected Order Value':4200000,'Date':'2025-02-08','Quotation No':'QT-010'},
-  {State:'Maharashtra','Product Type':'Hoist','Lead Source':'Website','Lead Owner':'Priya Sharma','Inquiry Status':'Quotation Sent','Quotation Status':'Pending','Expected Order Value':285000,'Date':'2025-01-14','Quotation No':'QT-004'},
-  {State:'Maharashtra','Product Type':'Gantry Crane','Lead Source':'LinkedIn','Lead Owner':'Priya Sharma','Inquiry Status':'Inquiry','Quotation Status':'','Expected Order Value':950000,'Date':'2025-01-25','Quotation No':''},
-  {State:'Maharashtra','Product Type':'EOT Crane','Lead Source':'Reference','Lead Owner':'Amit Shah','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':1250000,'Date':'2025-02-01','Quotation No':'QT-008'},
-  {State:'Maharashtra','Product Type':'EOT Crane','Lead Source':'Existing','Lead Owner':'Amit Shah','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':3800000,'Date':'2025-03-05','Quotation No':'QT-016'},
-  {State:'Haryana','Product Type':'Jib Crane','Lead Source':'Reference','Lead Owner':'Rajesh Nair','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':380000,'Date':'2025-03-01','Quotation No':'QT-015'},
-  {State:'Maharashtra','Product Type':'EOT Crane','Lead Source':'Reference','Lead Owner':'Amit Shah','Inquiry Status':'Won','Quotation Status':'Accepted','Expected Order Value':1580000,'Date':'2025-04-01','Quotation No':'QT-021'},
-];
+// ── HUB ENGINE: LEADS + SALES INTEGRATION ──
+
+function getCurrentFY() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  return month >= 4 ? `${year}-${year + 1}` : `${year - 1}-${year}`;
+}
+
+async function fetchSalesSummary() {
+  const fy = getCurrentFY();
+  const id = MALGUDI.SALES_SHEET_ID;
+  // Tab mapping for current FY
+  const tabs = { '2024-2025': { mce: 'MCE-24-25', ma: 'MA-24-25' }, '2025-2026': { mce: 'MCE-25-26', ma: 'MA-25-26' } };
+  const t = tabs[fy] || tabs['2025-2026'];
+  
+  try {
+    const [mce, ma] = await Promise.all([
+      fetch(`https://opensheet.elk.sh/${id}/${encodeURIComponent(t.mce)}`).then(r => r.json()),
+      fetch(`https://opensheet.elk.sh/${id}/${encodeURIComponent(t.ma)}`).then(r => r.json())
+    ]);
+    
+    const clean = (val) => parseFloat(String(val||'0').replace(/[^\d.-]/g, '')) || 0;
+    const now = new Date().toISOString().slice(0, 7); // YYYY-MM
+
+    let monthRev = 0, fyRev = 0, count = 0;
+    [...mce, ...ma].forEach(r => {
+      const rev = clean(r.Revenue);
+      fyRev += rev;
+      count++;
+      // Simplistic date check from Tally export format if available, or skip
+      if (r.Date && r.Date.includes(new Date().toLocaleString('en-IN', {month:'short'}))) monthRev += rev;
+    });
+
+    return { fyRev, monthRev, count };
+  } catch(e) {
+    console.warn('Sales fetch failed:', e);
+    return { fyRev: 0, monthRev: 0, count: 0 };
+  }
+}
 
 async function loadHome() {
-  const resp = await fetchData('leads', 'limit=1000');
-  const leads = (resp && resp.data) ? resp.data : SAMPLE;
-  const src   = resp ? (resp.source || 'api') : 'sample';
+  const fy = getCurrentFY();
+  const fyStart = `${fy.split('-')[0]}-04-01`;
 
+  // 1. Fetch Data
+  const [leadResp, sales] = await Promise.all([
+    fetchData('leads', 'limit=2000'),
+    fetchSalesSummary()
+  ]);
+
+  const leads = (leadResp && leadResp.data) ? leadResp.data : [];
+  const src = leadResp ? (leadResp.source || 'api') : 'sample';
   updateSyncStatus(src);
 
-  const won     = leads.filter(l => /won|confirmed/i.test(l['Inquiry Status']||''));
-  const rev     = leads.reduce((s,l) => s + parseVal(l['Expected Order Value']), 0);
-  const convPct = leads.length ? ((won.length / leads.length)*100).toFixed(1) : 0;
+  // 2. Process Leads (Current FY only)
+  const fyLeads = leads.filter(l => {
+    const d = String(l.Date || '').trim();
+    return d && d >= fyStart;
+  });
+  
+  const won     = fyLeads.filter(l => /won|confirmed|accepted/i.test(l['Inquiry Status']||''));
+  const wonAmt  = won.reduce((s,l) => s + parseVal(l['Expected Order Value']), 0);
+  const pipeAmt = fyLeads.reduce((s,l) => s + parseVal(l['Expected Order Value']), 0);
+  const convPct = fyLeads.length ? ((won.length / fyLeads.length)*100).toFixed(1) : 0;
 
-  setV('h-leads', leads.length);
-  setV('h-won', won.length);
-  setV('h-rev', fmtINR(rev));
+  // 3. Update KPIs
+  setV('h-leads', fyLeads.length);
+  setV('h-won', fmtINR(wonAmt));
+  setV('h-rev-month', fmtINR(sales.monthRev)); // Actual Sales this month
+  setV('h-won-month', sales.count);           // Actual Invoice Count
+  setV('h-rev', fmtINR(pipeAmt));
   setV('h-conv', convPct + '%');
-  setV('h-proj', '—'); // placeholder until projects.html has data
-  setV('h-svc',  '—');
+  
+  document.getElementById('h-leads-d').textContent = `FY ${fy}`;
 
+  // 4. Render Charts
   const O = getChartOpts();
 
-  // Revenue trend
+  // Revenue trend (Pipeline)
   const monthly = {};
-  leads.forEach(l => { const k = monthKey(l['Date']); if(k) monthly[k] = (monthly[k]||0)+parseVal(l['Expected Order Value']); });
+  fyLeads.forEach(l => { const k = monthKey(l['Date']); if(k) monthly[k] = (monthly[k]||0)+parseVal(l['Expected Order Value']); });
   const sm = sortMonths(monthly);
   mkChart('c-home-rev', {
     type:'line',
-    data:{labels:Object.keys(sm), datasets:[{label:'Pipeline ₹',data:Object.values(sm),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.08)',fill:true,tension:.4,pointRadius:4,borderWidth:2.5}]},
+    data:{labels:Object.keys(sm), datasets:[{label:'Pipeline ₹',data:Object.values(sm),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.08)',fill:true,tension:.4,pointRadius:4,borderWidth:2.5}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...O.tt,callbacks:{label:c=>' '+fmtINR(c.raw)}}},
-      scales:{x:{grid:{color:O.grid}},y:{grid:{color:O.grid},ticks:{callback:v=>fmtINR(v)}}}}
+      scales:{x:{grid:{color:O.grid},ticks:{color:'var(--txt2)'}},y:{grid:{color:O.grid},ticks:{callback:v=>fmtINR(v),color:'var(--txt2)'}}}}
   });
 
   // Funnel bar
-  const quots = leads.filter(l => l['Quotation No'] && String(l['Quotation No']).trim()).length;
-  const lost  = leads.filter(l => /lost|rejected/i.test(l['Inquiry Status']||'')).length;
+  const quots = fyLeads.filter(l => l['Quotation No'] && String(l['Quotation No']).trim()).length;
+  const lost  = fyLeads.filter(l => /lost|rejected/i.test(l['Inquiry Status']||'')).length;
   mkChart('c-home-funnel', {
     type:'bar',
     data:{labels:['Inquiry','Quotation','Won','Lost'],
-      datasets:[{data:[leads.length,quots,won.length,lost],backgroundColor:['#6366f1','#3b82f6','#10b981','#ef4444'],borderRadius:8,borderSkipped:false}]},
+      datasets:[{data:[fyLeads.length,quots,won.length,lost],backgroundColor:['#6366f1','#3b82f6','#10b981','#ef4444'],borderRadius:8}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:O.tt},
-      scales:{x:{grid:{color:O.grid}},y:{grid:{color:O.grid},beginAtZero:true}}}
+      scales:{x:{grid:{color:O.grid},ticks:{color:'var(--txt2)'}},y:{grid:{color:O.grid},beginAtZero:true,ticks:{color:'var(--txt2)'}}}}
   });
 
-  // State doughnut
-  const byState = groupBy(leads,'State');
+  // State spread
+  const byState = groupBy(fyLeads,'State');
   const topSt = Object.entries(byState).sort((a,b)=>b[1]-a[1]).slice(0,7);
   mkChart('c-home-state', {
     type:'doughnut',
-    data:{labels:topSt.map(e=>e[0]),datasets:[{data:topSt.map(e=>e[1]),backgroundColor:MALGUDI.COLORS,borderWidth:2,borderColor:'transparent',hoverOffset:6}]},
-    options:{cutout:'56%',responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:5,font:{size:10}}},tooltip:O.tt}}
+    data:{labels:topSt.map(e=>e[0]),datasets:[{data:topSt.map(e=>e[1]),backgroundColor:MALGUDI.COLORS,borderWidth:2,borderColor:'transparent'}]},
+    options:{cutout:'65%',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:10,font:{size:10},color:'var(--txt2)'}},tooltip:O.tt}}
   });
 
-  // Product doughnut
-  const byProd = sumByKey(leads,'Product Type','Expected Order Value');
+  // Product mix
+  const byProd = sumByKey(fyLeads,'Product Type','Expected Order Value');
   mkChart('c-home-prod', {
     type:'doughnut',
-    data:{labels:Object.keys(byProd),datasets:[{data:Object.values(byProd),backgroundColor:MALGUDI.COLORS,borderWidth:2,borderColor:'transparent',hoverOffset:6}]},
-    options:{cutout:'56%',responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:5,font:{size:10}}},
+    data:{labels:Object.keys(byProd),datasets:[{data:Object.values(byProd),backgroundColor:MALGUDI.COLORS,borderWidth:2,borderColor:'transparent'}]},
+    options:{cutout:'65%',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:10,font:{size:10},color:'var(--txt2)'}},
         tooltip:{...O.tt,callbacks:{label:c=>` ${c.label}: ${fmtINR(c.raw)}`}}}}
   });
 
@@ -637,11 +695,7 @@ async function loadHome() {
   setV('lastSync', 'Synced: ' + new Date().toLocaleTimeString());
 }
 
-function redrawCharts() {
-  Object.values(CH).forEach(c => c && c.destroy && c.destroy());
-  Object.keys(CH).forEach(k => delete CH[k]);
-  loadHome();
-}
+function redrawCharts() { loadHome(); }
 
 loadHome();
 startCountdown(30, c => setV('cdown', c), loadHome);

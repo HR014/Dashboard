@@ -51,7 +51,8 @@ button{cursor:pointer;font-family:var(--font);}
 /* ── HEADER ── */
 .header{height:62px;background:var(--s1);border-bottom:1px solid var(--bdr);
   display:flex;align-items:center;justify-content:space-between;padding:0 28px;
-  position:sticky;top:0;z-index:500;backdrop-filter:blur(16px);}
+  position:sticky;top:0;z-index:500;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);}
+
 .hdr-brand{display:flex;align-items:center;gap:12px;}
 .hdr-logo{width:38px;height:38px;border-radius:10px;overflow:hidden;flex-shrink:0;
   background:linear-gradient(135deg,var(--blue),var(--purple));
@@ -86,15 +87,22 @@ button{cursor:pointer;font-family:var(--font);}
 .kpi-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:12px;margin-bottom:18px;}
 .kpi-card{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r);
   padding:16px 18px;position:relative;overflow:hidden;
-  transition:transform var(--trans),box-shadow var(--trans);}
+  transition:transform var(--trans),box-shadow var(--trans);
+  display:flex;flex-direction:column;}
 .kpi-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);}
 .kpi-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;
   border-radius:var(--r) var(--r) 0 0;background:var(--kc,var(--blue));}
+
+/* keep icon on top, then DATA line, then AMOUNT */
+.kpi-ico{margin-bottom:10px;}
 .kpi-ico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;
   justify-content:center;font-size:16px;background:rgba(255,255,255,.06);margin-bottom:10px;}
-.kpi-lbl{font-size:.67rem;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
-.kpi-val{font-size:1.5rem;font-weight:900;color:var(--txt);font-family:var(--mono);line-height:1;margin-bottom:4px;}
+
+/* Two-line KPI layout: DATA line (label + sub) + AMOUNT line (value) */
+.kpi-lbl{font-size:.67rem;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;}
 .kpi-sub{font-size:.68rem;color:var(--txt3);}
+.kpi-meta{display:flex;flex-direction:column;gap:2px;margin-bottom:8px;}
+.kpi-val{font-size:1.5rem;font-weight:900;color:var(--txt);font-family:var(--mono);line-height:1;margin-bottom:0;}
 .span2{grid-column:span 2;} .span3{grid-column:span 3;}
 
 /* ── CHART CARDS ── */
@@ -128,6 +136,12 @@ button{cursor:pointer;font-family:var(--font);}
 .fg input,.fg select{padding:6px 10px;background:var(--s2);border:1px solid var(--bdr2);
   border-radius:7px;color:var(--txt);font-family:var(--font);font-size:.78rem;min-width:110px;}
 .fg input:focus,.fg select:focus{outline:none;border-color:var(--blue);}
+.fy-switch{flex:0 0 auto;}
+.btn-fy{padding:6px 12px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.28);
+  border-radius:7px;color:var(--blue);font-family:var(--font);font-size:.78rem;font-weight:700;
+  min-width:88px;cursor:pointer;white-space:nowrap;}
+.btn-fy:hover{background:var(--blue);color:#fff;}
+.btn-fy:focus{outline:none;border-color:var(--blue);}
 .btn-rst{padding:6px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);
   border-radius:7px;color:var(--red);font-size:.78rem;font-weight:600;align-self:flex-end;}
 .btn-rst:hover{background:var(--red);color:#fff;}
@@ -200,6 +214,7 @@ tr:last-child td{border-bottom:none;}
   .filter-bar{padding:10px 20px;align-items:stretch;}
   .fg{flex:1 1 160px;}
   .fg input,.fg select{min-width:0;width:100%;}
+  .btn-fy{width:100%;}
   .btn-rst{align-self:stretch;}
   .tbl-top{gap:12px;align-items:flex-start;flex-wrap:wrap;}
   .tbl-search{width:100%;max-width:320px;}
